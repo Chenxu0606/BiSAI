@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智策 | 智能旅行大数据助理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+
+<body>
+    {% raw %}
+    <div id="app">
+        <div class="floating-bubbles">
+            <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        </div>
+
+        <nav class="nav-bar">
+            <div class="nav-logo">智策</div>
+            <div class="bubble center-light"></div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">首页</a>
+                <a href="#" class="nav-link">探索</a>
+                <a href="#" class="nav-link">攻略</a>
+                <a href="/logout" class="nav-link">退出</a>
+            </div>
+        </nav>
+
+        <div class="sticky-sidebar">
+            <div class="sidebar-menu">
+                <div class="sidebar-item active"><span class="sidebar-icon">🏠</span><span class="sidebar-text">首页</span></div>
+                <div class="sidebar-item"><span class="sidebar-icon">🗺️</span><span class="sidebar-text">探索目的地</span></div>
+                <div class="sidebar-item"><span class="sidebar-icon">📊</span><span class="sidebar-text">数据大屏</span></div>
+                <div class="sidebar-item"><span class="sidebar-icon">🏨</span><span class="sidebar-text">酒店对比</span></div>
+                <div class="sidebar-item"><span class="sidebar-icon">⚙️</span><span class="sidebar-text">设置</span></div>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <section class="hero-section">
+                <h1 class="hero-title">智策</h1>
+                <p class="hero-subtitle">基于大数据与AI的深度旅行决策系统</p>
+                <div class="search-container">
+                    <input type="text" v-model="searchCity" class="search-box" placeholder="搜索目的地，解锁大数据报告..." @keyup.enter="doSearch">
+                    <button class="search-btn" @click="doSearch">➡</button>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <div class="weather-panel animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
+                    <div class="weather-header">
+                        <div>
+                            <div class="weather-city">{{ weather.city }}</div>
+                            <div class="weather-desc">{{ weather.desc }}</div>
+                        </div>
+                        <div class="weather-temp">{{ weather.temp }}</div>
+                    </div>
+                    <div class="weather-stats">
+                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.humidity }}%</div><div class="weather-stat-label">湿度</div></div>
+                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.wind }}</div><div class="weather-stat-label">风力</div></div>
+                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.aqi }}</div><div class="weather-stat-label">AQI指数</div></div>
+                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.sunrise }}</div><div class="weather-stat-label">日出</div></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-5 mb-10 animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
+
+                    <div class="insight-card-mini w-1/2 h-[280px] relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100" style="overflow: visible;">
+                        <div class="flex justify-between items-center mb-2 relative z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ activeChart === 'price' ? '📉' : '🌡️' }}</span>
+                                <h3 class="text-sm font-bold text-gray-800">{{ activeChart === 'price' ? '酒店均价预测' : '24小时温度趋势' }}</h3>
+                            </div>
+                            <button @click="toggleChart" class="toggle-chart-btn" style="display: none; position: absolute;"></button>
+                        </div>
+
+                        <div class="relative h-[180px] pr-8">
+                            <transition name="slide-v">
+                                <div v-if="activeChart === 'price'" key="price" class="absolute inset-0 right-8">
+                                    <div id="price-chart" style="width: 100%; height: 180px;"></div>
+                                </div>
+                                <div v-else key="temp" class="absolute inset-0 right-8">
+                                    <div id="temp-chart" style="width: 100%; height: 180px;"></div>
+                                </div>
+                            </transition>
+                        </div>
+
+                        <div class="pagination-dots vertical-right">
+                            <span class="dot" :class="{ active: activeChart === 'price' }" @click="activeChart = 'price'"></span>
+                            <span class="dot" :class="{ active: activeChart === 'temp' }" @click="activeChart = 'temp'"></span>
+                        </div>
+                    </div>
+
+                    <div class="insight-card-mini w-1/2 h-[280px] relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100" style="overflow: visible;">
+                        <div class="flex items-center gap-2 mb-2 relative z-10">
+                            <span class="text-lg">🔥</span>
+                            <h3 class="text-sm font-bold text-gray-800">核心景点热度分布</h3>
+                        </div>
+                        <div class="relative h-[180px] pr-8">
+                            <div id="hot-chart" style="width: 100%; height: 180px;"></div>
+                        </div>
+
+                        <div class="pagination-dots vertical-right">
+                            <span class="dot active" style="background-color: #34c759;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-insight-section animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
+                    <div class="section-header">
+                        <h2 class="section-title">目的地空间全景看板</h2>
+                        <p class="section-subtitle">基于地理信息系统的酒店、景点及餐饮综合分布分析</p>
+                    </div>
+
+                    <div class="map-board-container">
+                        <div class="map-side-panel">
+                            <div class="stat-group">
+                                <div class="stat-item">
+                                    <span class="stat-icon hotel">🏨</span>
+                                    <div class="stat-info">
+                                        <div class="stat-count">{{ hotels.length }}</div>
+                                        <div class="stat-label">推荐住宿</div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-icon scenic">🎯</span>
+                                    <div class="stat-info">
+                                        <div class="stat-count">{{ scenics.length }}</div>
+                                        <div class="stat-label">热门景点</div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-icon food">🍜</span>
+                                    <div class="stat-info">
+                                        <div class="stat-count">12</div>
+                                        <div class="stat-label">餐饮美食</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="map-legend">
+                                <p class="legend-title">图层滤镜</p>
+                                <div class="filter-chip active">全部</div>
+                                <div class="filter-chip">住宿</div>
+                                <div class="filter-chip">游玩</div>
+                            </div>
+                        </div>
+
+                        <div class="map-main-area">
+                            <div class="map-mock-bg">
+                                <div v-for="(h, i) in hotels.slice(0, 3)" :key="'h-'+i" class="map-marker hotel" :style="{ top: (20 + i*15) + '%', left: (30 + i*10) + '%' }">
+                                    <span class="marker-tip">{{ h.name }}</span>
+                                </div>
+                                <div v-for="(s, i) in scenics.slice(0, 3)" :key="'s-'+i" class="map-marker scenic" :style="{ top: (40 + i*10) + '%', left: (60 - i*5) + '%' }">
+                                    <span class="marker-tip">{{ s.name }}</span>
+                                </div>
+                                <div class="map-marker food" style="top: 75%; left: 45%"><span class="marker-tip">特色老字号美食</span></div>
+                                <div class="map-overlay-info">坐标系统：WGS-84 实时数据校验已通过</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-on-scroll" :class="{ visible: hotelsVisible }" style="margin-top: 80px;">
+                    <div class="section-header"><h2 class="section-title">精选住宿详情</h2></div>
+                    <div class="card-grid">
+                        <div v-for="hotel in hotels" :key="hotel.id" class="card">
+                            <div class="card-tag hotel">🏨 优选</div>
+                            <h3 class="card-title">{{ hotel.name }}</h3>
+                            <p class="card-desc">{{ hotel.address }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer"><p>© 2026 智策旅行大数据系统. 大赛演示专用版.</p></footer>
+        </div>
+    </div>
+    {% endraw %}
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

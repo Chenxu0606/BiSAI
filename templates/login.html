@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智策 - 智能旅行助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<!-- 🌍 卫星飞掠地球视频（已调慢速度：0.3 倍速） -->
+<video
+    autoplay
+    muted
+    loop
+    playsinline
+    class="bg-video"
+    oncanplay="this.playbackRate = 0.8"
+>
+    <source src="../static/videos/earth-flyover.mp4" type="video/mp4">
+    您的浏览器不支持视频播放
+</video>
+
+<!-- 登录卡片 -->
+<div class="login-container">
+    <div class="glass-card">
+        <div class="logo-area">
+            <div class="logo-icon">Z</div>
+            <h1>智策</h1>
+            <p>欢迎您！准备好开始您的旅程了吗？</p>
+        </div>
+
+        <div class="alert" id="alert"></div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label>用户名 / 邮箱</label>
+                <input type="text" id="username" placeholder="请输入账号">
+            </div>
+
+            <div class="form-group">
+                <label>密码</label>
+                <div class="pwd-box">
+                    <input type="password" id="password" placeholder="请输入密码">
+                    <button type="button" id="toggleBtn">显示</button>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label class="remember">
+                    <input type="checkbox"> <span>记住我</span>
+                </label>
+                <a href="#" class="forget">忘记密码</a>
+            </div>
+
+            <button type="submit" class="submit-btn" id="loginBtn">登录</button>
+        </form>
+
+        <div class="register">
+            没有账号？<a href="#">立即注册</a>
+        </div>
+    </div>
+</div>
+
+<script src="../static/script.js"></script>
+</body>
+</html>
