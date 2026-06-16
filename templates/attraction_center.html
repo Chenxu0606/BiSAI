@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>中国旅游探索中心 | Travel Discovery Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/attraction_center.css') }}">
+</head>
+
+<body>
+
+<!-- ========================= -->
+<!-- FLOATING BACKGROUND -->
+<!-- ========================= -->
+
+<div class="floating-bubbles">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
+
+<!-- ========================= -->
+<!-- TOP NAV -->
+<!-- ========================= -->
+
+<nav class="nav-bar">
+
+    <div class="nav-logo">
+        智策·ZHICE
+    </div>
+
+    <div class="nav-links">
+        <a href="/" class="nav-link">首页</a>
+        <a href="/attraction_center" class="nav-link active">探索</a>
+        <a href="/ai_guide" class="nav-link">智策</a>
+        <a href="/login" class="nav-link">退出</a>
+    </div>
+
+</nav>
+
+<!-- ========================= -->
+<!-- SIDEBAR -->
+<!-- ========================= -->
+
+    <div class="sticky-sidebar">
+
+        <div class="sidebar-menu">
+
+            <a href="/" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/home.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">首页</span>
+                </div>
+            </a>
+
+            <a href="/city_detail" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/city.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">城市详情</span>
+                </div>
+            </a>
+
+            <a href="/ai_guide" class="sidebar-link">
+                <div class="sidebar-item" :class="{active: currentPage === 'ai_guide'}">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/ai_guide.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">智策</span>
+                </div>
+            </a>
+
+            <a href="/attraction_center" class="sidebar-link">
+                <div class="sidebar-item active">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/scenic.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">景点介绍</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/hotel.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">酒店详情</span>
+                </div>
+            </a>
+
+            <a href="/food/search" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/food.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">餐饮详情</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/route.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">AI路径规划</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/weather.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">旅行天气</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/profile.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">个人中心</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/settings.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">设置</span>
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+
+<!-- ========================= -->
+<!-- MAIN -->
+<!-- ========================= -->
+
+<main class="dashboard-container">
+
+    <!-- HERO -->
+    <section class="hero-section">
+
+        <div id="hero-bg" class="hero-bg"></div>
+        <div class="hero-mask"></div>
+
+        <div class="hero-content">
+
+            <p class="hero-kicker">Explore China</p>
+
+            <h1 class="hero-title">发现中国之美</h1>
+
+            <p class="hero-description">
+                从雪山、湖泊、古城到海岛，探索中国最值得出发的旅行目的地。
+            </p>
+
+            <div class="hero-stat-group">
+
+                <div class="hero-stat">
+                    <h3>5000+</h3>
+                    <span>精选景点</span>
+                </div>
+
+                <div class="hero-stat">
+                    <h3>34</h3>
+                    <span>省级行政区</span>
+                </div>
+
+                <div class="hero-stat">
+                    <h3>365</h3>
+                    <span>全年探索</span>
+                </div>
+
+            </div>
+
+            <button id="explore-btn" class="explore-btn">
+                开始探索
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- AI 推荐 -->
+    <section class="glass-card section-card">
+
+        <div class="section-header">
+            <h2>AI 智能推荐</h2>
+            <p>根据季节与热门趋势生成推荐</p>
+        </div>
+
+        <div id="ai-recommend-list" class="recommend-grid"></div>
+
+    </section>
+
+    <!-- 十大景点 -->
+    <section class="glass-card section-card">
+
+        <div class="section-header">
+            <h2>中国十大必去景点</h2>
+        </div>
+
+        <div id="top-attractions" class="horizontal-scroll"></div>
+
+    </section>
+
+    <!-- 主题 -->
+    <section class="glass-card section-card">
+
+        <div class="section-header">
+            <h2>按主题探索</h2>
+        </div>
+
+        <div class="theme-grid">
+            <div class="theme-card">🏔 山岳风光</div>
+            <div class="theme-card">🏯 历史文化</div>
+            <div class="theme-card">🌊 海岛海滨</div>
+            <div class="theme-card">🌸 古镇古城</div>
+            <div class="theme-card">🎡 主题乐园</div>
+            <div class="theme-card">🏞 自然风光</div>
+        </div>
+
+    </section>
+
+    <!-- 四季 -->
+    <section class="season-layout">
+
+        <div class="glass-card season-card spring">
+            <span>SPRING</span>
+            <h3>春</h3>
+            <p>西湖 · 婺源 · 苏州园林</p>
+        </div>
+
+        <div class="glass-card season-card summer">
+            <span>SUMMER</span>
+            <h3>夏</h3>
+            <p>青海湖 · 呼伦贝尔</p>
+        </div>
+
+        <div class="glass-card season-card autumn">
+            <span>AUTUMN</span>
+            <h3>秋</h3>
+            <p>九寨沟 · 香山</p>
+        </div>
+
+        <div class="glass-card season-card winter">
+            <span>WINTER</span>
+            <h3>冬</h3>
+            <p>哈尔滨 · 长白山</p>
+        </div>
+
+    </section>
+
+    <!-- 城市 -->
+    <section class="glass-card section-card">
+
+        <div class="section-header">
+            <h2>热门城市</h2>
+        </div>
+
+        <div class="city-grid">
+
+            <div class="city-card" data-city="上海">上海</div>
+            <div class="city-card" data-city="北京">北京</div>
+            <div class="city-card" data-city="杭州">杭州</div>
+            <div class="city-card" data-city="成都">成都</div>
+            <div class="city-card" data-city="重庆">重庆</div>
+            <div class="city-card" data-city="西安">西安</div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/attraction_center.js') }}"></script>
+
+</body>
+</html>

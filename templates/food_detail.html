@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>智策系统 - 餐厅详情页</title>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = { securityJsCode: '你的安全密钥' };
+    </script>
+    <script type="text/javascript" src="https://webaapi.amap.com/maps?v=2.0&key=95a06b0f1354993d31049fcb70aac0c7"></script>
+    <style>
+        :root { --apple-blue: #007AFF; --apple-bg: #bdb6ec; --main: #1d1d1f; }
+        body, html { margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; background: var(--apple-bg); font-family: -apple-system, sans-serif; }
+
+        .floating-bubbles { position: fixed; inset: 0; z-index: 0; filter: blur(100px); overflow: hidden; }
+        .bubble { position: absolute; border-radius: 50%; opacity: 0.7; mix-blend-mode: screen; will-change: transform; }
+        .bubble:nth-child(1) { width: 80vw; height: 80vw; top: -20%; left: -20%; background: radial-gradient(circle, rgb(176, 197, 243) 0%, transparent 75%); animation: cornerFlowTL 25s infinite alternate ease-in-out; }
+        .bubble:nth-child(2) { width: 75vw; height: 75vw; top: -20%; right: -20%; background: radial-gradient(circle, rgb(145, 246, 227) 0%, transparent 75%); animation: cornerFlowTR 22s infinite alternate ease-in-out; }
+        .bubble:nth-child(3) { width: 85vw; height: 85vw; bottom: -25%; left: -20%; background: radial-gradient(circle, rgb(239, 160, 248) 0%, transparent 75%); animation: cornerFlowBL 28s infinite alternate ease-in-out; }
+        .bubble:nth-child(4) { width: 80vw; height: 80vw; bottom: -20%; right: -20%; background: radial-gradient(circle, rgb(235, 60, 248) 0%, transparent 75%); animation: cornerFlowBR 30s infinite alternate ease-in-out; }
+
+        @keyframes cornerFlowTL { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(35vw, 30vh) scale(1.2); } }
+        @keyframes cornerFlowTR { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-30vw, 35vh) scale(1.1); } }
+        @keyframes cornerFlowBL { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40vw, -25vh) scale(1.3); } }
+        @keyframes cornerFlowBR { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-35vw, -35vh) scale(1.2); } }
+
+        .container { position: relative; z-index: 100; max-width: 1000px; margin: 40px auto; padding: 0 20px 100px; }
+        .frosted-card { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); }
+        .info-card { padding: 30px 40px; margin-bottom: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .shop-name { font-size: 32px; margin: 0; font-weight: 700; color: #4a3a89; }
+        .tag { background: var(--apple-blue); color: white; padding: 6px 16px; border-radius: 12px; font-weight: 600; font-size: 14px; }
+        .meta-data { display: flex; gap: 15px; font-size: 15px; color: #5a4b9b; align-items: center; font-weight: 600; }
+
+        .visual-row { display: flex; gap: 20px; height: 350px; margin-bottom: 25px; }
+        .slider-wrapper, .map-wrapper { flex: 1; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.4); }
+        .slider-track { display: flex; width: 200%; height: 100%; }
+
+        .slider-track.single-img { width: 100% !important; animation: none !important; }
+        .slider-track.animate-slide { animation: slide 10s infinite ease-in-out; }
+        .slider-track img { width: 50%; height: 100%; object-fit: cover; }
+        .slider-track.single-img img { width: 100% !important; }
+        #map-container { width: 100%; height: 100%; }
+        @keyframes slide { 0%, 45% { transform: translateX(0); } 50%, 95% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+        .recommend-title { font-size: 20px; font-weight: 800; color: #4a3a89; margin: 10px 0 20px 10px; display: flex; align-items: center; gap: 10px; }
+        .recommend-row { display: flex; gap: 20px; min-height: 100px; }
+        .dish-card { flex: 1; height: 260px; position: relative; overflow: hidden; transition: transform 0.3s ease; cursor: pointer; max-width: 50%; }
+
+        .dish-card.full-width { max-width: 100%; }
+        .dish-card:hover { transform: translateY(-5px); }
+        .dish-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        .dish-label { position: absolute; bottom: 15px; left: 15px; right: 15px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 12px 20px; border-radius: 16px; color: #35286a; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+
+        #detail-bubble-canvas { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+        .mini-bubble-wrapper { position: absolute; will-change: transform; opacity: 0; transform: scale(0); transition: opacity 0.8s, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .mini-bubble-wrapper.pop { opacity: 1; transform: scale(1); }
+        .mini-bubble-core { width: 100%; height: 100%; border-radius: 50% !important; background: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0) 70%); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.65), inset -3px -3px 10px rgba(0, 0, 0, 0.08), 0 6px 15px rgba(74, 58, 137, 0.12); border: 1px solid rgba(255, 255, 255, 0.5); }
+    </style>
+</head>
+<body>
+    <div class="floating-bubbles"><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div></div>
+    <div id="detail-bubble-canvas"></div>
+
+    <div class="container">
+        <div class="frosted-card info-card">
+            <div class="header">
+                <h1 class="shop-name" id="shop-name">基因加载中...</h1>
+                <div class="tag" id="shop-score">评分 --</div>
+            </div>
+            <div class="meta-data">
+                <span>价格： <span id="shop-price">--</span></span><span>|</span>
+                <span>类别：<span id="shop-type">类别</span></span><span>|</span>
+                <span>地址：<span id="shop-address">探测地址中...</span></span>
+            </div>
+        </div>
+
+        <div class="visual-row">
+            <div class="slider-wrapper frosted-card">
+                <div class="slider-track" id="slider-track">
+                    <img id="img1" src=""><img id="img2" src="">
+                </div>
+            </div>
+            <div class="map-wrapper frosted-card"><div id="map-container"></div></div>
+        </div>
+
+        <div class="recommend-title">推荐菜</div>
+        <div class="recommend-row" id="recommend-container"></div>
+    </div>
+
+    <script>
+        async function initDetailPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const name = urlParams.get('name');
+            if (!name) return;
+
+            try {
+                const res = await fetch(`/api/food/item_detail?name=${encodeURIComponent(name)}`);
+                const result = await res.json();
+                if (result.code === 200) {
+                    const data = result.data;
+                    document.getElementById('shop-name').innerText = data.name;
+                    document.getElementById('shop-score').innerText = "评分 " + (data.score || '4.5');
+                    document.getElementById('shop-price').innerText = "人均 ￥" + (data.price || '50');
+                    document.getElementById('shop-type').innerText = data.type || '美食';
+                    document.getElementById('shop-address').innerText = data.address || '暂无详细地址';
+
+                    const track = document.getElementById('slider-track');
+                    if (data.images && data.images.length === 1) {
+                        document.getElementById('img1').src = data.images[0];
+                        track.className = "slider-track single-img"; // 单图静态模式
+                    } else if (data.images && data.images.length >= 2) {
+                        document.getElementById('img1').src = data.images[0];
+                        document.getElementById('img2').src = data.images[1];
+                        track.className = "slider-track animate-slide"; // 双图滚动模式
+                    }
+
+                    const recContainer = document.getElementById('recommend-container');
+                    recContainer.innerHTML = '';
+
+                    if (data.dishes && data.dishes.length > 0) {
+                        data.dishes.forEach(dish => {
+                            const isFull = data.dishes.length === 1 ? 'full-width' : '';
+                            recContainer.innerHTML += `
+                                <div class="frosted-card dish-card ${isFull}">
+                                    <img src="${dish.image}">
+                                    <div class="dish-label">${dish.name}</div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        recContainer.innerHTML = `
+                            <div style="width: 100%; text-align: center; padding: 45px 0; color: #4a3a89; font-size: 16px; font-weight: 700; opacity: 0.6; letter-spacing: 1px;">
+                                该店暂无推荐菜
+                            </div>
+                        `;
+                    }
+
+
+                    if (data.location) {
+                        const coords = data.location.split(',');
+                        const lng = parseFloat(coords[0]); const lat = parseFloat(coords[1]);
+                        if (!isNaN(lng) && !isNaN(lat)) {
+                            const map = new AMap.Map('map-container', { center: [lng, lat], zoom: 16, viewMode: '3D' });
+                            map.add(new AMap.Marker({ position: [lng, lat] }));
+                        }
+                    }
+                }
+            } catch (e) { console.error("加载详情失败", e); }
+        }
+
+        function initBackgroundBubbles() {
+            let detailBubbles = []; const canvas = document.getElementById('detail-bubble-canvas');
+            class DetailMiniBubble {
+                constructor() {
+                    this.r = 15 + Math.random() * 25; this.x = Math.random() * window.innerWidth; this.y = Math.random() * window.innerHeight;
+                    this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4;
+                    this.wrapper = document.createElement('div'); this.wrapper.className = 'mini-bubble-wrapper';
+                    this.wrapper.style.width = this.wrapper.style.height = (this.r * 2) + 'px';
+                    const core = document.createElement('div'); core.className = 'mini-bubble-core';
+                    this.wrapper.appendChild(core); canvas.appendChild(this.wrapper);
+                    setTimeout(() => this.wrapper.classList.add('pop'), 50);
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < -this.r * 2) this.x = window.innerWidth + this.r; if (this.x > window.innerWidth + this.r) this.x = -this.r;
+                    if (this.y < -this.r * 2) this.y = window.innerHeight + this.r; if (this.y > window.innerHeight + this.r) this.y = -this.r;
+                    this.wrapper.style.transform = `translate3d(${this.x - this.r}px, ${this.y - this.r}px, 0)`;
+                }
+            }
+            for (let i = 0; i < 15; i++) detailBubbles.push(new DetailMiniBubble());
+            function animate() { detailBubbles.forEach(b => b.update()); requestAnimationFrame(animate); }
+            animate();
+        }
+
+        window.onload = function() { initDetailPage(); initBackgroundBubbles(); };
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>智策系统-关键词展示页</title>
+    <style>
+        :root {
+            --apple-blue: #007AFF;
+            --apple-bg: #fbfbfd;
+            --apple-gray: #86868b;
+            --apple-dark: #1d1d1f;
+        }
+        /* 🎨 保持你的珠光色彩与极光背景不变 */
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            overflow: hidden;
+            background-color: #bdb6ec;
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+            cursor: pointer;
+        }
+
+        /* 🌌 顶栏公用样式 */
+        .nav-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 48px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; z-index: 1000;
+        }
+        .nav-logo { font-size: 18px; font-weight: 600; color: var(--apple-dark); letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-link { font-size: 14px; color: var(--apple-gray); text-decoration: none; transition: all 0.3s; padding: 4px 0; }
+        .nav-link:hover { color: var(--apple-dark); }
+
+        /* 🧭 侧边栏公用样式 */
+        .sticky-sidebar {
+            position: fixed; top: 48px; left: 0; width: 260px; height: calc(100vh - 48px);
+            background: rgba(255,255,255,0.85); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-right: 1px solid rgba(0,0,0,0.08); z-index: 999; overflow-y: auto; padding: 32px 0; box-sizing: border-box;
+        }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+        .sidebar-link { text-decoration: none; color: inherit; display: block; }
+        .sidebar-item { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 500; color: var(--apple-gray); cursor: pointer; transition: all 0.3s; }
+        .sidebar-item:hover { background: rgba(0,122,255,0.1); color: var(--apple-blue); transform: translateX(4px); }
+        .sidebar-item.active { background: var(--apple-blue); color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.25); }
+        .sidebar-img { width: 20px; height: 20px; object-fit: contain; }
+        .sidebar-text { flex: 1; }
+
+        /* 右侧独立画布容器：承载极光和珍珠 */
+        .stage-container {
+            position: fixed; top: 48px; left: 260px;
+            width: calc(100vw - 260px); height: calc(100vh - 48px);
+            overflow: hidden; z-index: 1;
+        }
+
+        #aurora-container {
+            position: absolute; inset: 0; z-index: 0;
+            filter: blur(100px); overflow: hidden; pointer-events: none;
+        }
+
+        .aurora-blob {
+            position: absolute; width: 80vw; height: 80vw;
+            border-radius: 50%; opacity: 0.65;
+            mix-blend-mode: screen;
+            animation: auroraMove 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { background: #91defe; top: -15%; left: -10%; }
+        .blob-2 { background: #efb3d5; bottom: -10%; right: -10%; }
+        .blob-3 { background: #bdb6ec; top: 20%; right: 5%; }
+        .blob-4 { background: #f9bccc; bottom: 10%; left: 5%; }
+        .blob-5 { background: #99c0f9; top: -5%; right: 40%; }
+        .blob-6 { background: #d7b3e3; bottom: 30%; left: -10%; }
+
+        @keyframes auroraMove {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(12%, 15%) scale(1.1) rotate(30deg); }
+            100% { transform: translate(-8%, 10%) scale(0.95) rotate(0deg); }
+        }
+
+        /* 💎 核心珍珠色彩逻辑 */
+        .bubble-wrapper {
+            position: absolute; will-change: transform; z-index: 10; pointer-events: none;
+            opacity: 0; transform: scale(0); transition: opacity 0.6s, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bubble-wrapper.pop { opacity: 1; transform: scale(1); }
+
+        .bubble-core {
+            width: 100%; height: 100%; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at 77% 30%, white 5px, aqua 8%, darkblue 60%, aqua 100%);
+            box-shadow:
+                inset 0 0 20px #fff,
+                inset 10px 0 46px #eaf5fc,
+                inset 88px 0px 60px #c2d8fe,
+                inset -20px -60px 100px #fde9ea,
+                inset 0 50px 140px #fde9ea,
+                0 0 90px #fff;
+            animation: pearlFloat 4s ease-in-out infinite;
+        }
+
+        .bubble-text {
+            color: #4a3a89; font-weight: bold; text-align: center;
+            padding: 10px; z-index: 12;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        @keyframes pearlFloat {
+            0%, 100% { transform: rotate(-8deg) translateY(0); }
+            50% { transform: rotate(8deg) translateY(-10px); }
+        }
+
+        .bubble-bg .bubble-core { opacity: 0.3; box-shadow: inset 0 0 20px #fff, 0 0 30px #fff; }
+
+        /* ✍️ 标题与等待文字（相对于右侧区域绝对居中定位） */
+        .header {
+            position: absolute; top: 15%; width: 100%; text-align: center;
+            color: #4a3a89; z-index: 100; pointer-events: none;
+        }
+
+        #waiting-msg {
+            font-size: 18px; color: #4a3a89; margin-top: 20px;
+            font-weight: 300; letter-spacing: 3px; opacity: 0.7;
+            animation: textPulse 2s infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 0.9; transform: scale(1); }
+        }
+
+        #click-hint {
+            display: none; font-size: 16px; color: #4a3a89;
+            margin-top: 15px; animation: breathe 2s infinite; font-weight: bold;
+        }
+        @keyframes breathe { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body onclick="handleManualJump()">
+
+    <nav class="nav-bar">
+        <div class="nav-logo">智策·ZHICE</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="#" class="nav-link">探索</a>
+            <a href="/ai_guide" class="nav-link">智策</a>
+            <a href="/logout" class="nav-link">退出</a>
+        </div>
+    </nav>
+
+    <div class="sticky-sidebar">
+        <div class="sidebar-menu">
+            <a href="/" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/home.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">首页</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/city.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">城市详情</span>
+                </div>
+            </a>
+            <a href="/ai_guide" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/ai_guide.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">智策</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/scenic.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">景点介绍</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/hotel.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">酒店详情</span>
+                </div>
+            </a>
+            <a href="/food/search" class="sidebar-link">
+                <div class="sidebar-item active">
+                    <span class="sidebar-icon"><img src="/static/images/food.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">餐饮详情</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/route.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">AI路径规划</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/weather.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">旅行天气</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/profile.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">个人中心</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/settings.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">设置</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="stage-container" id="stage">
+        <div id="aurora-container">
+            <div class="aurora-blob blob-1"></div>
+            <div class="aurora-blob blob-2"></div>
+            <div class="aurora-blob blob-3"></div>
+            <div class="aurora-blob blob-4"></div>
+            <div class="aurora-blob blob-5"></div>
+            <div class="aurora-blob blob-6"></div>
+        </div>
+
+        <div class="header">
+            <h1 id="status-title">风味基因解析中...</h1>
+            <div id="waiting-msg">初始化数据链路...</div>
+            <div id="click-hint">建模已完成，点击任意位置探索</div>
+        </div>
+    </div>
+
+<script>
+let bubbles = [];
+let mouse = { x: -9999, y: -9999 };
+let isReadyToJump = false;
+
+const stage = document.getElementById('stage');
+
+// 监听相对主容器的鼠标坐标
+stage.addEventListener('mousemove', e => {
+    const rect = stage.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+});
+stage.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+const waitTexts = [
+    "正在连接数据矩阵...",
+    "正在获取实景地理坐标...",
+    "正在抓取店家实景基因...",
+    "解析地区口味偏好...",
+    "智策建模中，即将完成..."
+];
+
+class Bubble {
+    constructor(text, weight, isBg = false) {
+        // 基于独立容器尺寸计算合法边界
+        const stageW = stage.clientWidth;
+        const stageH = stage.clientHeight;
+
+        this.r = isBg ? Math.random() * 20 + 15 : 45 + weight * 5;
+        this.x = Math.random() * (stageW - this.r * 2) + this.r;
+        this.y = Math.random() * (stageH - this.r * 2) + this.r;
+        this.vx = (Math.random() - 0.5) * 1.2;
+        this.vy = (Math.random() - 0.5) * 1.2;
+        this.isBg = isBg;
+
+        this.wrapper = document.createElement('div');
+        this.wrapper.className = isBg ? 'bubble-wrapper bubble-bg' : 'bubble-wrapper';
+        this.wrapper.style.width = this.wrapper.style.height = (this.r * 2) + 'px';
+
+        const core = document.createElement('div');
+        core.className = 'bubble-core';
+        core.style.animationDelay = (Math.random() * -4) + 's';
+
+        if (!isBg) {
+            const span = document.createElement('span');
+            span.className = 'bubble-text';
+            span.style.fontSize = (weight + 5) + 'px';
+            span.innerText = text;
+            core.appendChild(span);
+        }
+
+        this.wrapper.appendChild(core);
+        stage.appendChild(this.wrapper); // 挂载到右侧舞台容器
+
+        setTimeout(() => this.wrapper.classList.add('pop'), 50);
+    }
+
+    update() {
+        const stageW = stage.clientWidth;
+        const stageH = stage.clientHeight;
+
+        this.x += this.vx; this.y += this.vy;
+
+        // 动态碰撞右侧主区域边缘
+        if (this.x < this.r) { this.x = this.r; this.vx *= -1; }
+        if (this.x > stageW - this.r) { this.x = stageW - this.r; this.vx *= -1; }
+        if (this.y < this.r) { this.y = this.r; this.vy *= -1; }
+        if (this.y > stageH - this.r) { this.y = stageH - this.r; this.vy *= -1; }
+
+        const dx = this.x - mouse.x;
+        const dy = this.y - mouse.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 150) {
+            const force = (150 - dist) / 150;
+            this.vx += dx / dist * force * 0.5;
+            this.vy += dy / dist * force * 0.5;
+        }
+        this.vx *= 0.99; this.vy *= 0.99;
+        this.wrapper.style.transform = `translate3d(${this.x - this.r}px, ${this.y - this.r}px, 0)`;
+    }
+}
+
+function solveCollision() {
+    for (let i = 0; i < bubbles.length; i++) {
+        for (let j = i + 1; j < bubbles.length; j++) {
+            const b1 = bubbles[i], b2 = bubbles[j];
+            const dx = b2.x - b1.x, dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const min = b1.r + b2.r;
+            if (dist < min && dist > 0) {
+                const overlap = min - dist;
+                const nx = dx / dist, ny = dy / dist;
+                b1.vx -= nx * overlap * 0.05; b1.vy -= ny * overlap * 0.05;
+                b2.vx += nx * overlap * 0.05; b2.vy += ny * overlap * 0.05;
+            }
+        }
+    }
+}
+
+function animate() {
+    bubbles.forEach(b => b.update());
+    solveCollision();
+    requestAnimationFrame(animate);
+}
+
+async function init() {
+    for (let i = 0; i < 18; i++) bubbles.push(new Bubble("", 0, true));
+    animate();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const city = urlParams.get('city') || "上海";
+    const msgEl = document.getElementById('waiting-msg');
+
+    let t = 0;
+    const textTimer = setInterval(() => {
+        if(!isReadyToJump) {
+            msgEl.innerText = waitTexts[t % waitTexts.length];
+            t++;
+        } else {
+            clearInterval(textTimer);
+        }
+    }, 2200);
+
+    try {
+        const res = await fetch(`/api/food/search_keywords?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+
+        if (data.code === 200 && data.keywords) {
+            const keywords = data.keywords;
+            msgEl.innerText = "实景基因同步成功，渲染中...";
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < keywords.length) {
+                    bubbles.push(new Bubble(keywords[i][0], keywords[i][1]));
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    isReadyToJump = true;
+                    document.getElementById('status-title').innerText = `${city} 建模已完成`;
+                    msgEl.style.display = "none";
+                    document.getElementById('click-hint').style.display = "block";
+                }
+            }, 400);
+        }
+    } catch (e) {
+        msgEl.innerText = "数据响应超时，尝试重连...";
+    }
+}
+
+function handleManualJump() {
+    if (isReadyToJump) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const city = urlParams.get('city') || "上海";
+        window.location.href = `/food/food_list?city=${encodeURIComponent(city)}`;
+    }
+}
+
+init();
+</script>
+</body>
+</html>

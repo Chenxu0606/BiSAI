@@ -1,0 +1,142 @@
+/* =========================
+   Apple Glass Layout System
+========================= */
+
+:root {
+    --apple-blue: #007AFF;
+    --apple-bg: #fbfbfd;
+    --apple-dark: #1d1d1f;
+    --apple-gray: #86868b;
+}
+
+/* =========================
+   TOP NAV BAR（统一 food_search）
+========================= */
+.nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--apple-dark);
+    letter-spacing: -0.5px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 32px;
+}
+
+.nav-link {
+    font-size: 14px;
+    color: var(--apple-gray);
+    text-decoration: none;
+    transition: 0.25s;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--apple-dark);
+}
+
+.nav-link.active {
+    color: var(--apple-blue);
+}
+
+/* =========================
+   SIDEBAR（统一 food_search）
+========================= */
+.sticky-sidebar {
+    position: fixed;
+    top: 48px;
+    left: 0;
+
+    width: 260px;
+    height: calc(100vh - 48px);
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+    border-right: 1px solid rgba(0,0,0,0.08);
+
+    padding: 32px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    z-index: 999;
+}
+
+/* menu */
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-link {
+    text-decoration: none;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 14px 20px;
+    border-radius: 12px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    color: var(--apple-gray);
+
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+/* hover */
+.sidebar-item:hover {
+    background: rgba(0,122,255,0.1);
+    color: var(--apple-blue);
+    transform: translateX(4px);
+}
+
+/* active */
+.sidebar-item.active {
+    background: var(--apple-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.25);
+}
+
+
+
+/* icon */
+.sidebar-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* active icon 白色反转 */
+.sidebar-item.active .sidebar-img {
+    filter: brightness(0) invert(1);
+}

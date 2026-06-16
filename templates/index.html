@@ -4,184 +4,645 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智策 | 智能旅行大数据助理</title>
+    <title>智策·ZHICE</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=4e66b2a63134502213b13b5e64db2010"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
-    {% raw %}
-    <div id="app">
-        <div class="floating-bubbles">
-            <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-        </div>
 
-        <nav class="nav-bar">
-            <div class="nav-logo">智策</div>
-            <div class="bubble center-light"></div>
-            <div class="nav-links">
-                <a href="#" class="nav-link active">首页</a>
-                <a href="#" class="nav-link">探索</a>
-                <a href="#" class="nav-link">攻略</a>
-                <a href="/logout" class="nav-link">退出</a>
-            </div>
-        </nav>
+{% raw %}
 
-        <div class="sticky-sidebar">
-            <div class="sidebar-menu">
-                <div class="sidebar-item active"><span class="sidebar-icon">🏠</span><span class="sidebar-text">首页</span></div>
-                <div class="sidebar-item"><span class="sidebar-icon">🗺️</span><span class="sidebar-text">探索目的地</span></div>
-                <div class="sidebar-item"><span class="sidebar-icon">📊</span><span class="sidebar-text">数据大屏</span></div>
-                <div class="sidebar-item"><span class="sidebar-icon">🏨</span><span class="sidebar-text">酒店对比</span></div>
-                <div class="sidebar-item"><span class="sidebar-icon">⚙️</span><span class="sidebar-text">设置</span></div>
-            </div>
-        </div>
+<div id="app">
 
-        <div class="main-container">
-            <section class="hero-section">
-                <h1 class="hero-title">智策</h1>
-                <p class="hero-subtitle">基于大数据与AI的深度旅行决策系统</p>
-                <div class="search-container">
-                    <input type="text" v-model="searchCity" class="search-box" placeholder="搜索目的地，解锁大数据报告..." @keyup.enter="doSearch">
-                    <button class="search-btn" @click="doSearch">➡</button>
-                </div>
-            </section>
-
-            <section class="content-section">
-                <div class="weather-panel animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
-                    <div class="weather-header">
-                        <div>
-                            <div class="weather-city">{{ weather.city }}</div>
-                            <div class="weather-desc">{{ weather.desc }}</div>
-                        </div>
-                        <div class="weather-temp">{{ weather.temp }}</div>
-                    </div>
-                    <div class="weather-stats">
-                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.humidity }}%</div><div class="weather-stat-label">湿度</div></div>
-                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.wind }}</div><div class="weather-stat-label">风力</div></div>
-                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.aqi }}</div><div class="weather-stat-label">AQI指数</div></div>
-                        <div class="weather-stat"><div class="weather-stat-value">{{ weather.sunrise }}</div><div class="weather-stat-label">日出</div></div>
-                    </div>
-                </div>
-
-                <div class="flex gap-5 mb-10 animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
-
-                    <div class="insight-card-mini w-1/2 h-[280px] relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100" style="overflow: visible;">
-                        <div class="flex justify-between items-center mb-2 relative z-10">
-                            <div class="flex items-center gap-2">
-                                <span class="text-lg">{{ activeChart === 'price' ? '📉' : '🌡️' }}</span>
-                                <h3 class="text-sm font-bold text-gray-800">{{ activeChart === 'price' ? '酒店均价预测' : '24小时温度趋势' }}</h3>
-                            </div>
-                            <button @click="toggleChart" class="toggle-chart-btn" style="display: none; position: absolute;"></button>
-                        </div>
-
-                        <div class="relative h-[180px] pr-8">
-                            <transition name="slide-v">
-                                <div v-if="activeChart === 'price'" key="price" class="absolute inset-0 right-8">
-                                    <div id="price-chart" style="width: 100%; height: 180px;"></div>
-                                </div>
-                                <div v-else key="temp" class="absolute inset-0 right-8">
-                                    <div id="temp-chart" style="width: 100%; height: 180px;"></div>
-                                </div>
-                            </transition>
-                        </div>
-
-                        <div class="pagination-dots vertical-right">
-                            <span class="dot" :class="{ active: activeChart === 'price' }" @click="activeChart = 'price'"></span>
-                            <span class="dot" :class="{ active: activeChart === 'temp' }" @click="activeChart = 'temp'"></span>
-                        </div>
-                    </div>
-
-                    <div class="insight-card-mini w-1/2 h-[280px] relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100" style="overflow: visible;">
-                        <div class="flex items-center gap-2 mb-2 relative z-10">
-                            <span class="text-lg">🔥</span>
-                            <h3 class="text-sm font-bold text-gray-800">核心景点热度分布</h3>
-                        </div>
-                        <div class="relative h-[180px] pr-8">
-                            <div id="hot-chart" style="width: 100%; height: 180px;"></div>
-                        </div>
-
-                        <div class="pagination-dots vertical-right">
-                            <span class="dot active" style="background-color: #34c759;"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="map-insight-section animate-on-scroll" v-if="weather.city" :class="{ visible: weatherVisible }">
-                    <div class="section-header">
-                        <h2 class="section-title">目的地空间全景看板</h2>
-                        <p class="section-subtitle">基于地理信息系统的酒店、景点及餐饮综合分布分析</p>
-                    </div>
-
-                    <div class="map-board-container">
-                        <div class="map-side-panel">
-                            <div class="stat-group">
-                                <div class="stat-item">
-                                    <span class="stat-icon hotel">🏨</span>
-                                    <div class="stat-info">
-                                        <div class="stat-count">{{ hotels.length }}</div>
-                                        <div class="stat-label">推荐住宿</div>
-                                    </div>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-icon scenic">🎯</span>
-                                    <div class="stat-info">
-                                        <div class="stat-count">{{ scenics.length }}</div>
-                                        <div class="stat-label">热门景点</div>
-                                    </div>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-icon food">🍜</span>
-                                    <div class="stat-info">
-                                        <div class="stat-count">12</div>
-                                        <div class="stat-label">餐饮美食</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="map-legend">
-                                <p class="legend-title">图层滤镜</p>
-                                <div class="filter-chip active">全部</div>
-                                <div class="filter-chip">住宿</div>
-                                <div class="filter-chip">游玩</div>
-                            </div>
-                        </div>
-
-                        <div class="map-main-area">
-                            <div class="map-mock-bg">
-                                <div v-for="(h, i) in hotels.slice(0, 3)" :key="'h-'+i" class="map-marker hotel" :style="{ top: (20 + i*15) + '%', left: (30 + i*10) + '%' }">
-                                    <span class="marker-tip">{{ h.name }}</span>
-                                </div>
-                                <div v-for="(s, i) in scenics.slice(0, 3)" :key="'s-'+i" class="map-marker scenic" :style="{ top: (40 + i*10) + '%', left: (60 - i*5) + '%' }">
-                                    <span class="marker-tip">{{ s.name }}</span>
-                                </div>
-                                <div class="map-marker food" style="top: 75%; left: 45%"><span class="marker-tip">特色老字号美食</span></div>
-                                <div class="map-overlay-info">坐标系统：WGS-84 实时数据校验已通过</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="animate-on-scroll" :class="{ visible: hotelsVisible }" style="margin-top: 80px;">
-                    <div class="section-header"><h2 class="section-title">精选住宿详情</h2></div>
-                    <div class="card-grid">
-                        <div v-for="hotel in hotels" :key="hotel.id" class="card">
-                            <div class="card-tag hotel">🏨 优选</div>
-                            <h3 class="card-title">{{ hotel.name }}</h3>
-                            <p class="card-desc">{{ hotel.address }}</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="footer"><p>© 2026 智策旅行大数据系统. 大赛演示专用版.</p></footer>
-        </div>
+    <div class="floating-bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
     </div>
-    {% endraw %}
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+
+    <nav class="nav-bar">
+
+        <div class="nav-logo">
+            智策·ZHICE
+        </div>
+
+        <div class="bubble center-light"></div>
+
+        <div class="nav-links">
+            <a href="#" class="nav-link active">首页</a>
+            <a href="/attraction_center" class="nav-link">探索</a>
+            <a href="/ai_guide" class="nav-link">智策</a>
+            <a href="/logout" class="nav-link">退出</a>
+        </div>
+
+    </nav>
+
+    <div class="sticky-sidebar">
+
+        <div class="sidebar-menu">
+
+            <a href="/" class="sidebar-link">
+                <div class="sidebar-item active">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/home.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">首页</span>
+                </div>
+            </a>
+
+            <a href="/city_detail" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/city.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">城市详情</span>
+                </div>
+            </a>
+
+            <a href="/ai_guide" class="sidebar-link">
+                <div class="sidebar-item" :class="{active: currentPage === 'ai_guide'}">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/ai_guide.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">智策</span>
+                </div>
+            </a>
+
+            <a href="/attraction_center" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/scenic.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">景点介绍</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/hotel.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">酒店详情</span>
+                </div>
+            </a>
+
+            <a href="/food/search" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/food.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">餐饮详情</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/route.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">AI路径规划</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/weather.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">旅行天气</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/profile.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">个人中心</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/settings.png" class="sidebar-img">
+                    </span>
+                    <span class="sidebar-text">设置</span>
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="main-container">
+
+        <section class="hero-section">
+
+            <h1 class="hero-title">智策</h1>
+
+            <p class="hero-subtitle">
+                基于大数据与AI的深度旅行决策系统
+            </p>
+
+            <div class="search-container">
+
+                <input
+                    type="text"
+                    v-model="searchCity"
+                    class="search-box"
+                    placeholder="搜索目的地，解锁大数据报告..."
+                    @keyup.enter="doSearch"
+                >
+
+                <button class="search-btn" @click="doSearch">
+                    ➡
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="content-section">
+
+            <!-- 1. 天气面板 -->
+            <div
+                class="weather-panel animate-on-scroll"
+                v-if="weather.city"
+                :class="{ visible: weatherVisible }"
+            >
+
+                <div class="weather-header">
+
+                    <div>
+                        <div class="weather-city">
+                            {{ weather.city }}
+                        </div>
+
+                        <div class="weather-desc">
+                            {{ weather.desc }}
+                        </div>
+                    </div>
+
+                    <div class="weather-temp">
+                        {{ weather.temp }}
+                    </div>
+
+                </div>
+
+                <div class="weather-stats">
+
+                    <div class="weather-stat">
+                        <div class="weather-stat-value">{{ weather.humidity }}%</div>
+                        <div class="weather-stat-label">湿度</div>
+                    </div>
+
+                    <div class="weather-stat">
+                        <div class="weather-stat-value">{{ weather.wind }}</div>
+                        <div class="weather-stat-label">风力</div>
+                    </div>
+
+                    <div class="weather-stat">
+                        <div class="weather-stat-value">{{ weather.aqi }}</div>
+                        <div class="weather-stat-label">AQI指数</div>
+                    </div>
+
+                    <div class="weather-stat">
+                        <div class="weather-stat-value">{{ weather.sunrise }}</div>
+                        <div class="weather-stat-label">日出</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- 2. 今日旅游推荐面板（已移出 chart-row，独立一行） -->
+            <div
+                class="travel-recommend-card animate-on-scroll"
+                v-if="weather.city"
+                :class="{ visible: weatherVisible }"
+            >
+                <div class="card-header">
+                    <span class="title">✈ 今日旅游城市推荐</span>
+                    <span class="date">{{ todayDate }}</span>
+                </div>
+                <div class="content">
+                    {{ todayTip.content }}
+                </div>
+                <span class="tag">{{ todayTip.tag }}</span>
+            </div>
+
+            <!-- 3. 图表行（酒店价格、景点热度） -->
+            <div
+                class="chart-row animate-on-scroll"
+                v-if="weather.city"
+                :class="{ visible: weatherVisible }"
+            >
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+
+                        <div class="chart-title-wrap">
+
+
+                            <h3 class="chart-title">
+                                {{ activeChart === 'price'
+                                    ? '酒店均价预测'
+                                    : '24小时温度趋势'
+                                }}
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <div class="chart-body">
+
+                        <transition name="slide-v">
+
+                            <div
+                                v-if="activeChart === 'price'"
+                                key="price"
+                                class="chart-inner"
+                            >
+                                <div id="price-chart" class="chart-echart"></div>
+                            </div>
+
+                            <div
+                                v-else
+                                key="temp"
+                                class="chart-inner"
+                            >
+                                <div id="temp-chart" class="chart-echart"></div>
+                            </div>
+
+                        </transition>
+
+                    </div>
+
+                    <div class="pagination-dots vertical-right">
+
+                        <span
+                            class="dot"
+                            :class="{ active: activeChart === 'price' }"
+                            @click="activeChart='price'"
+                        ></span>
+
+                        <span
+                            class="dot"
+                            :class="{ active: activeChart === 'temp' }"
+                            @click="activeChart='temp'"
+                        ></span>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+
+                        <div class="chart-title-wrap">
+
+
+                            <h3 class="chart-title">
+                                核心景点热度分布
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <div class="chart-body">
+
+                        <div id="hot-chart" class="chart-echart"></div>
+
+                    </div>
+
+                    <div class="pagination-dots vertical-right">
+                        <span class="dot active hot-dot"></span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="dashboard-grid animate-on-scroll"
+                v-if="weather.city"
+                :class="{ visible: weatherVisible }"
+            >
+
+                <div class="dashboard-card">
+
+                    <div>
+
+                        <div class="dashboard-top">
+
+                            <div>
+
+                                <p class="dashboard-label">
+                                    预测今日游客量
+                                </p>
+
+                                <h2 class="dashboard-number">
+                                    {{ visitorCount }}
+                                </h2>
+
+                            </div>
+
+                            <div class="dashboard-up">
+                                ↑ 12%
+                            </div>
+
+                        </div>
+
+                        <div id="visitor-chart" class="visitor-chart"></div>
+
+                    </div>
+
+                    <div class="dashboard-footer">
+
+                        <div>
+
+                            <p class="dashboard-footer-label">
+                                高峰时段
+                            </p>
+
+                            <p class="dashboard-footer-value">
+                                14:00 - 18:00
+                            </p>
+
+                        </div>
+
+                        <div class="text-right">
+
+                            <p class="dashboard-footer-label">
+                                热门指数
+                            </p>
+
+                            <p class="dashboard-footer-hot">
+                                A+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-card">
+
+                    <div>
+
+                        <p class="dashboard-label">
+                            AI旅行评分
+                        </p>
+
+                        <div class="score-row">
+
+                            <span class="score-number">
+                                92
+                            </span>
+
+                            <span class="score-total">
+                                /100
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="score-circle-wrap">
+
+                        <div class="score-circle">
+
+                            <span class="score-star">✨</span>
+
+                            <div class="score-tip">
+                                非常适合旅行
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="score-list">
+
+                        <div class="score-item">
+
+                            <div class="score-left">
+                                <span class="score-emoji">🌤️</span>
+                                <span class="score-name">天气舒适度</span>
+                            </div>
+
+                            <span class="score-value">95</span>
+
+                        </div>
+
+                        <div class="score-item">
+
+                            <div class="score-left">
+                                <span class="score-emoji">🚗</span>
+                                <span class="score-name">交通便利度</span>
+                            </div>
+
+                            <span class="score-value">89</span>
+
+                        </div>
+
+                        <div class="score-item no-border">
+
+                            <div class="score-left">
+                                <span class="score-emoji">🌃</span>
+                                <span class="score-name">夜生活指数</span>
+                            </div>
+
+                            <span class="score-value">91</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-card">
+
+                    <div>
+
+                        <p class="dashboard-label mb-6">
+                            酒店预算预测
+                        </p>
+
+                        <div class="budget-list">
+
+                            <div class="budget-item">
+
+                                <div class="budget-row">
+                                    <span>经济型</span>
+                                    <span>￥680</span>
+                                </div>
+
+                                <div class="budget-bar">
+                                    <div class="budget-fill green-fill"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="budget-item">
+
+                                <div class="budget-row">
+                                    <span>舒适型</span>
+                                    <span>￥1480</span>
+                                </div>
+
+                                <div class="budget-bar">
+                                    <div class="budget-fill blue-fill"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="budget-item">
+
+                                <div class="budget-row">
+                                    <span>高端型</span>
+                                    <span>￥3680</span>
+                                </div>
+
+                                <div class="budget-bar">
+                                    <div class="budget-fill purple-fill"></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="map-insight-section animate-on-scroll"
+                v-if="weather.city"
+                :class="{ visible: weatherVisible }"
+            >
+
+                <div class="section-header">
+
+                    <h2 class="section-title">
+                        目的地空间全景看板
+                    </h2>
+
+                    <p class="section-subtitle">
+                        基于地理信息系统的酒店、景点及餐饮综合分布分析
+                    </p>
+
+                </div>
+
+                <div class="map-board-container">
+
+                    <div class="map-side-panel">
+
+                        <div class="stat-group">
+
+                            <div class="stat-item">
+
+                                <span class="stat-icon hotel">🏨</span>
+
+                                <div class="stat-info">
+                                    <div class="stat-count">
+                                        {{ hotels.length }}
+                                    </div>
+                                    <div class="stat-label">
+                                        推荐住宿
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="stat-item">
+
+                                <span class="stat-icon scenic">🎯</span>
+
+                                <div class="stat-info">
+                                    <div class="stat-count">
+                                        {{ scenics.length }}
+                                    </div>
+                                    <div class="stat-label">
+                                        热门景点
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="stat-item">
+
+                                <span class="stat-icon food">🍜</span>
+
+                                <div class="stat-info">
+                                    <div class="stat-count">
+                                        {{ foods?.length || 0 }}
+                                    </div>
+                                    <div class="stat-label">
+                                        餐饮美食
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="map-legend">
+
+                            <p class="legend-title">
+                                图层滤镜
+                            </p>
+
+                            <div class="filter-chip active">全部</div>
+                            <div class="filter-chip">住宿</div>
+                            <div class="filter-chip">游玩</div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="map-main-area">
+
+                        <div id="mapContainer"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="footer">
+            <p>© 2026 智策旅行大数据系统. 首页.</p>
+        </footer>
+
+    </div>
+
+</div>
+
+{% endraw %}
+
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+
 </body>
 </html>

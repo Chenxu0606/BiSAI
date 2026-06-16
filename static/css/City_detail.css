@@ -1,0 +1,510 @@
+/* =========================
+   Apple Glass UI System (Unified)
+   只保留 food_search 风格最终版
+========================= */
+
+:root {
+    --apple-blue: #007AFF;
+    --apple-bg: #fbfbfd;
+    --apple-dark: #1d1d1f;
+    --apple-gray: #86868b;
+}
+
+/* =========================
+   GLOBAL RESET
+========================= */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--apple-bg);
+    overflow-x: hidden;
+}
+
+/* =========================
+   FLOATING BUBBLES（统一 food_search 版本）
+========================= */
+.floating-bubbles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    z-index: 0;
+    filter: blur(120px);
+    overflow: hidden;
+    background: #fff;
+    pointer-events: none;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.6;
+    mix-blend-mode: multiply;
+    will-change: transform;
+}
+
+.bubble:nth-child(1) {
+    width: 80vw;
+    height: 80vw;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgb(176, 197, 243) 0%, transparent 75%);
+    animation: move1 25s infinite alternate ease-in-out;
+}
+
+.bubble:nth-child(2) {
+    width: 75vw;
+    height: 75vw;
+    top: -20%;
+    right: -20%;
+    background: radial-gradient(circle, rgb(145, 246, 227) 0%, transparent 75%);
+    animation: move2 22s infinite alternate ease-in-out;
+}
+
+.bubble:nth-child(3) {
+    width: 85vw;
+    height: 85vw;
+    bottom: -25%;
+    left: -20%;
+    background: radial-gradient(circle, rgb(247, 176, 255) 0%, transparent 75%);
+    animation: move3 28s infinite alternate ease-in-out;
+}
+
+.bubble:nth-child(4) {
+    width: 80vw;
+    height: 80vw;
+    bottom: -20%;
+    right: -20%;
+    background: radial-gradient(circle, rgba(169,255,98,0.96) 0%, transparent 75%);
+    animation: move4 30s infinite alternate ease-in-out;
+}
+
+@keyframes move1 {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(35vw,30vh) scale(1.2); }
+}
+@keyframes move2 {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-30vw,35vh) scale(1.1); }
+}
+@keyframes move3 {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(40vw,-25vh) scale(1.3); }
+}
+@keyframes move4 {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-35vw,-35vh) scale(1.2); }
+}
+
+/* =========================
+   TOP NAV（完全统一 food_search）
+========================= */
+.nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--apple-dark);
+}
+
+.nav-links {
+    display: flex;
+    gap: 32px;
+}
+
+.nav-link {
+    font-size: 14px;
+    color: var(--apple-gray);
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.nav-link:hover {
+    color: var(--apple-dark);
+}
+
+.nav-link.active {
+    color: var(--apple-blue);
+}
+
+/* =========================
+   SIDEBAR（完全统一 food_search）
+========================= */
+.sticky-sidebar {
+    position: fixed;
+    top: 48px;
+    left: 0;
+
+    width: 260px;
+    height: calc(100vh - 48px);
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+    border-right: 1px solid rgba(0,0,0,0.08);
+
+    padding: 32px 16px;
+    overflow-y: auto;
+    z-index: 999;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-link {
+    text-decoration: none;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 14px 20px;
+    border-radius: 12px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    color: var(--apple-gray);
+
+    transition: all 0.25s ease;
+}
+
+.sidebar-item:hover {
+    background: rgba(0,122,255,0.1);
+    color: var(--apple-blue);
+    transform: translateX(4px);
+}
+
+.sidebar-item.active {
+    background: var(--apple-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.25);
+}
+
+.sidebar-img {
+    width: 20px;
+    height: 20px;
+}
+
+.sidebar-item.active .sidebar-img {
+    filter: brightness(0) invert(1);
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.dashboard-container{
+    margin-left:260px;
+    padding-top:80px;
+    min-height:100vh;
+    position:relative;
+    z-index:2;
+}
+
+.glass-header{
+    width:90%;
+    max-width:1200px;
+    margin:0 auto 32px auto;
+    display:flex;
+    justify-content:center;
+}
+
+.search-bar{
+    display:flex;
+    align-items:center;
+
+    width:600px;
+    height:56px;
+
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(20px);
+
+    border-radius:18px;
+    overflow:hidden;
+
+    box-shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+
+.search-bar input{
+    flex:1;
+    border:none;
+    outline:none;
+    background:none;
+
+    padding:0 24px;
+    font-size:16px;
+}
+
+.search-bar button{
+    width:70px;
+    height:100%;
+    border:none;
+    background:var(--apple-blue);
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.data-grid{
+    width:90%;
+    max-width:1200px;
+
+    margin:0 auto;
+
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    grid-template-rows:auto auto;
+    gap:24px;
+}
+
+.glass-card{
+    background:rgba(255,255,255,0.6);
+    backdrop-filter:blur(30px);
+    -webkit-backdrop-filter:blur(30px);
+
+    border:1px solid rgba(255,255,255,0.4);
+
+    border-radius:24px;
+    padding:28px;
+
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.08);
+
+    transition:0.3s;
+}
+
+.glass-card:hover{
+    transform:translateY(-4px);
+}
+
+.hero-card{
+    min-height:260px;
+}
+
+.hero-title{
+    font-family:'Noto Serif SC', serif;
+
+    font-size:72px;
+
+    font-weight:900;
+
+    letter-spacing:4px;
+
+    line-height:1.05;
+
+    color:#111;
+    margin-bottom:20px;
+}
+
+.subtitle{
+    font-family:'Noto Serif SC', serif;
+
+    font-size:22px;
+
+    color:#555;
+
+    line-height:1.8;
+
+    max-width:600px;
+}
+
+.tags-container{
+    margin-top:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.tag{
+    padding:8px 16px;
+    border-radius:999px;
+
+    background:rgba(0,122,255,0.12);
+    color:var(--apple-blue);
+
+    font-size:14px;
+}
+
+.weather-card{
+    min-height:260px;
+}
+
+.temp{
+    font-size:64px;
+    font-weight:700;
+}
+
+.status{
+    margin-top:12px;
+    font-size:18px;
+    color:#666;
+}
+
+.stats-card{
+    grid-column:1 / span 2;
+}
+
+.stats-list{
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+}
+
+.stat-item{
+    flex:1;
+}
+
+.label{
+    display:block;
+    color:#888;
+    margin-bottom:8px;
+}
+
+.value{
+    font-family:'Inter', sans-serif;
+
+    font-size:42px;
+
+    font-weight:700;
+}
+/* =========================
+   Impression + Season
+========================= */
+
+.impression-card,
+.season-card{
+    margin-top:24px;
+}
+
+.impression-card{
+    grid-column:1;
+}
+
+.season-card{
+    grid-column:2;
+}
+
+.impression-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    margin-top:24px;
+}
+
+.impression-item{
+    display:grid;
+    grid-template-columns:90px 1fr 45px;
+    align-items:center;
+    gap:12px;
+}
+
+.impression-label{
+    font-size:15px;
+    color:#555;
+}
+
+.impression-bar{
+    height:10px;
+    background:#edf2f7;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.bar-fill{
+    height:100%;
+    border-radius:999px;
+
+    background:linear-gradient(
+        90deg,
+        #007AFF,
+        #38BDF8
+    );
+}
+
+.score{
+    text-align:right;
+    font-weight:600;
+    color:#007AFF;
+}
+
+.season-block{
+    margin-top:18px;
+    padding:18px;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,0.5);
+
+    border:1px solid rgba(255,255,255,0.4);
+}
+
+.season-block h3{
+    margin:10px 0 6px;
+    font-size:22px;
+}
+
+.season-block p{
+    margin:0;
+    color:#666;
+    line-height:1.6;
+}
+
+.season-tag{
+    display:inline-block;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+    font-weight:600;
+
+    background:#e0f2fe;
+    color:#0284c7;
+}
+
+.warning-tag{
+    background:#fef3c7;
+    color:#d97706;
+}
+
+#bg-layer {
+    position: fixed;
+    inset: 0;
+
+    background-size: cover;
+    background-position: center;
+
+    z-index: -1;
+
+    transition: background-image 0.6s ease;
+}

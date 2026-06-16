@@ -1,0 +1,406 @@
+/* 复用你主站全局变量 & 基础动画 */
+* {margin: 0;padding: 0;box-sizing: border-box;}
+:root {
+    --apple-blue: #007AFF;
+    --apple-gray: #86868b;
+    --apple-light: #f5f5f7;
+    --apple-dark: #1d1d1f;
+    --apple-border: #d2d2d7;
+    --transition-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes pageLoad {0% {opacity: 0;transform: translateY(30px);}100% {opacity: 1;transform: translateY(0);}}
+@keyframes fadeInUp {from {opacity: 0;transform: translateY(40px);}to {opacity: 1;transform: translateY(0);}}
+@keyframes float {0%,100% {transform: translateY(0px);}50% {transform: translateY(-20px);}}
+@keyframes pulse {0%,100% {opacity: 1;}50% {opacity: 0.5;}}
+@keyframes gradientMove {0% {background-position: 0% 50%;}50% {background-position: 100% 50%;}100% {background-position: 0% 50%;}}
+
+.center-light {
+    width: 400px;height: 400px;top: 30%;left: 50%;
+    transform: translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(0,122,255,0.2) 0%, transparent 60%);
+    animation: pulse 8s infinite alternate;
+}
+.floating-bubbles {
+    position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;
+    z-index: -1;filter: blur(80px);background: #fbfbfd;overflow: hidden;
+}
+.bubble {
+    position: absolute;border-radius: 50%;opacity: 0.8;
+    mix-blend-mode: multiply;animation: moveAround 25s infinite alternate ease-in-out;
+}
+.bubble:nth-child(1) {width: 600px;height: 600px;top: -10%;left: -10%;background: radial-gradient(circle, rgba(0,122,255,0.4) 0%, transparent 80%);animation-duration: 30s;}
+.bubble:nth-child(2) {width: 500px;height: 500px;bottom: -10%;right: -5%;background: radial-gradient(circle, rgba(198,244,81,0.3) 0%, transparent 80%);animation-duration: 18s;animation-delay: -5s;}
+.bubble:nth-child(3) {width: 450px;height: 450px;top: 30%;right: 20%;background: radial-gradient(circle, rgba(175,82,222,0.1) 0%, transparent 70%);animation-duration: 25s;}
+.bubble:nth-child(4) {width: 100px;height: 100px;top: 30%;right: 30%;animation-delay: -2s;animation-duration: 18s;}
+
+body {
+    font-family: 'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif;
+    background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+    color: var(--apple-dark);min-height: 100vh;
+    -webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;overflow-x: hidden;
+}
+
+/* 导航栏 侧边栏 完全复用你原有样式 */
+.nav-bar {
+    position: fixed;top: 0;left: 0;right: 0;height: 48px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: saturate(180%) blur(20px);-webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.1);display: flex;align-items: center;justify-content: space-between;
+    padding: 0 24px;z-index: 1000;animation: pageLoad 0.6s var(--transition-smooth) forwards;
+}
+.nav-logo {font-size: 18px;font-weight: 600;color: var(--apple-dark);letter-spacing: -0.5px;position: relative;}
+.nav-logo::after {content: '';position: absolute;bottom: -2px;left: 0;width: 0;height: 2px;background: var(--apple-blue);transition: width 0.3s var(--transition-spring);}
+.nav-logo:hover::after {width: 100%;}
+.nav-links {display: flex;gap: 32px;align-items: center;}
+.nav-link {font-size: 14px;color: var(--apple-gray);text-decoration: none;transition: all 0.3s var(--transition-smooth);position: relative;padding: 4px 0;}
+.nav-link::after {content: '';position: absolute;bottom: 0;left: 50%;width: 0;height: 2px;background: var(--apple-blue);transition: all 0.3s var(--transition-spring);transform: translateX(-50%);border-radius: 1px;}
+.nav-link:hover {color: var(--apple-dark);}
+.nav-link:hover::after {width: 100%;}
+.nav-link.active {color: var(--apple-blue);}
+.nav-link.active::after {width: 100%;}
+
+.sticky-sidebar {position: fixed;top: 48px;left: 0;width: 260px;height: calc(100vh - 48px);background: rgba(255,255,255,0.85);backdrop-filter: saturate(180%) blur(20px);-webkit-backdrop-filter: saturate(180%) blur(20px);border-right: 1px solid rgba(0,0,0,0.08);z-index: 999;overflow-y: auto;padding: 32px 0;}
+.sidebar-menu {display: flex;flex-direction: column;gap: 8px;padding: 0 16px;}
+.sidebar-item {display: flex;align-items: center;gap: 16px;padding: 14px 20px;border-radius: 12px;font-size: 15px;font-weight: 500;color: var(--apple-gray);cursor: pointer;transition: all 0.3s var(--transition-smooth);}
+.sidebar-item:hover {background: rgba(0,122,255,0.1);color: var(--apple-blue);transform: translateX(4px);}
+.sidebar-item.active {background: var(--apple-blue);color: white;box-shadow: 0 4px 12px rgba(0,122,255,0.25);}
+.sidebar-img {width:20px;height:20px;object-fit:contain;}
+
+.main-container {margin-left: 260px !important;padding-top: 48px;min-height: 100vh;position: relative;z-index: 1;width: calc(100vw - 260px);overflow-x: hidden;}
+.content-section {max-width: 1200px;margin: 0 auto;padding: 60px 40px 100px;}
+.section-header {margin-bottom: 40px;}
+.section-title {font-size: 36px;font-weight: 700;color: var(--apple-dark);letter-spacing: -0.5px;position: relative;display: inline-block;}
+.section-title::after {content: '';position: absolute;bottom: -8px;left: 0;width: 60px;height: 4px;background: linear-gradient(90deg, var(--apple-blue), #5856d6);border-radius: 2px;transform: scaleX(0);transform-origin: left;transition: transform 0.6s var(--transition-spring);}
+.section-subtitle {font-size: 18px;color: var(--apple-gray);margin-top: 16px;}
+.section-header.text-center {text-align: center;}
+.section-header.text-center .section-title::after {left: 50%;transform: translateX(-50%) scaleX(0);}
+.section-header.text-center .section-title.visible::after {transform: translateX(-50%) scaleX(1);}
+
+/* AI攻略专属表单卡片 */
+.ai-form-card, .ai-result-card, .ai-chat-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 36px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 30px;
+    transition: all 0.5s var(--transition-smooth);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.form-row.full {grid-template-columns: 1fr;}
+.form-item label {
+    display: block;
+    font-size: 14px;
+    color: var(--apple-dark);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.req {color:#ff3b30;}
+.form-item input, .form-item select, .form-item textarea {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--apple-border);
+    background: #fbfbfd;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+.form-item textarea {height: auto;padding: 12px 16px;resize: none;}
+.form-item input:focus, .form-item select:focus, .form-item textarea:focus {
+    border-color: var(--apple-blue);
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+.submit-row {text-align: center;margin-top: 10px;}
+.ai-submit-btn {
+    background: linear-gradient(135deg, var(--apple-blue), #5856d6);
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s var(--transition-spring);
+    box-shadow: 0 8px 24px rgba(0,122,255,0.25);
+}
+.ai-submit-btn:hover {transform: translateY(-4px);box-shadow: 0 12px 32px rgba(0,122,255,0.35);}
+.ai-submit-btn:disabled {opacity:0.7;cursor:not-allowed;transform:none;}
+
+/* 结果展示 */
+.result-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.result-header h3 {font-size:20px;font-weight:600;color:var(--apple-dark);}
+.reset-btn {color:var(--apple-blue);background:none;border:none;cursor:pointer;font-size:14px;}
+.result-content {line-height:1.8;color:#333;font-size:15px;}
+.result-content h1,h2,h3 {margin:12px 0;}
+.result-content p {margin:8px 0;}
+
+/* AI聊天区域 */
+/* ================= AI聊天区域 (优化头像与苹果风格呼吸感) ================= */
+.chat-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.chat-box {
+    height: 450px; /* 稍微加高一点，大屏看攻略更爽 */
+    overflow-y: auto;
+    padding: 24px;
+    background: #fbfbfd;
+    border-radius: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px; /* 让对话之间有自然的间距 */
+}
+
+.chat-item {
+    display: flex;
+    align-items: flex-start; /* 关键 1：让头像和气泡顶部对齐，绝不纵向拉伸头像 */
+    gap: 12px; /* 头像和气泡之间的精致间距 */
+    max-width: 85%;
+}
+
+.chat-item.ai {
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.chat-item.user {
+    justify-content: flex-end;
+    align-self: flex-end;
+    flex-direction: row-reverse; /* 用户发言时，头像在右边，气泡在左边 */
+}
+
+/* 关键 2：给头像戴上金箍咒，彻底解决“变大”问题 */
+.chat-avatar {
+    width: 38px;               /* 苹果经典的精致小巧尺寸 */
+    height: 38px;
+    min-width: 38px;           /* 关键 3：强制不被挤压变形 */
+    min-height: 38px;
+    object-fit: contain;       /* 确保 PNG 图标原比例缩放 */
+    border-radius: 50%;        /* 裁切成正圆形（如果是方图会自动变圆） */
+    background: #ffffff;       /* 给图标加个纯白高级底色 */
+    padding: 6px;              /* 留出内边距，让耳机图标更精致 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* 微微的悬浮阴影 */
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+.chat-bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+/* 智小策的气泡：优雅浅灰 */
+.chat-item.ai .chat-bubble {
+    background: #e9e9eb;
+    color: var(--apple-dark);
+    border-top-left-radius: 4px; /* 苹果原生短信的小尾巴尖角效果 */
+}
+
+/* 用户的气泡：经典苹果蓝 */
+.chat-item.user .chat-bubble {
+    background: var(--apple-blue);
+    color: #fff;
+    border-top-right-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.15);
+}
+
+.chat-input-row {display:flex;gap:12px;}
+.chat-input-row input {
+    flex:1;
+    height:48px;
+    padding:0 16px;
+    border-radius:12px;
+    border:1px solid var(--apple-border);
+    outline:none;
+    font-size:15px;
+}
+.send-btn {
+    width:80px;
+    background:var(--apple-blue);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+}
+.send-btn:hover {background:#0066d6;}
+
+.footer {text-align: center;padding: 50px 24px;background: var(--apple-light);margin-top: 100px;}
+.footer p {font-size: 13px;color: var(--apple-gray);}
+
+.date-wrapper {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+/* 装饰用的显示层 */
+.date-display {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    background: #fbfbfd;
+    border: 1px solid var(--apple-border);
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--apple-gray); /* 没选时是灰色 */
+    pointer-events: none; /* 让点击穿透到底下的 input */
+    z-index: 1;
+}
+
+/* 当有值时，让文字变深色 */
+.date-wrapper:has(input:valid) .date-display {
+    color: var(--apple-dark);
+}
+
+/* 真正的日期输入框：全透明且铺满 */
+.real-date-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* 关键：完全透明 */
+    cursor: pointer;
+    z-index: 2; /* 确保它在最上面受点击 */
+}
+
+/* 鼠标悬停在包装盒时的反馈 */
+.date-wrapper:hover .date-display {
+    border-color: var(--apple-blue);
+}
+
+/* 解决 PC 端点击直接弹窗的问题 */
+.real-date-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* ================= AI 攻略内容渲染美化 (Marked.js 专用) ================= */
+
+/* 1. 基础间距与字体 */
+.result-content {
+    line-height: 1.8;
+    color: #334155; /* 柔和的深灰色 */
+    font-size: 15px;
+    letter-spacing: 0.2px;
+}
+
+/* 2. 标题美化：让 AI 的层级感清晰 */
+.result-content h1, .result-content h2, .result-content h3 {
+    color: var(--apple-dark);
+    margin: 24px 0 12px 0;
+    font-weight: 700;
+}
+
+.result-content h1 { font-size: 24px; border-bottom: 2px solid var(--apple-light); padding-bottom: 8px; }
+.result-content h2 { font-size: 20px; color: var(--apple-blue); }
+.result-content h3 {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.result-content h3::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: var(--apple-blue);
+    border-radius: 2px;
+}
+
+/* 3. 核心加粗样式：这部分是你最关心的 */
+.result-content b, .result-content strong {
+    color: var(--apple-dark);
+    font-weight: 600;
+    padding: 0 4px;
+    background: linear-gradient(120deg, rgba(0, 122, 255, 0.1) 0%, rgba(0, 122, 255, 0.05) 100%);
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+/* 4. 列表美化：避免 AI 生成的列表挤在一起 */
+.result-content ul, .result-content ol {
+    padding-left: 20px;
+    margin-bottom: 16px;
+}
+
+.result-content li {
+    margin-bottom: 8px;
+    position: relative;
+}
+
+/* 5. 引用块样式：用于 AI 的温馨提示或注意点 */
+.result-content blockquote {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-left: 4px solid var(--apple-border);
+    border-radius: 0 12px 12px 0;
+    color: var(--apple-gray);
+    font-style: italic;
+}
+
+/* 6. 表格美化：如果 AI 输出了预算表 */
+.result-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--apple-border);
+}
+
+.result-content th {
+    background: var(--apple-light);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.result-content td {
+    padding: 12px;
+    border-top: 1px solid var(--apple-border);
+}
+
+/* 7. 聊天区域的加粗同步（确保对话里的加粗也好看） */
+.chat-bubble b, .chat-bubble strong {
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(255,255,255,0.4);
+}
+/* 专属的免责声明样式 */
+.ai-disclaimer {
+    font-size: 8px;          /* 苹果风格的脚注尺寸 */
+    color: var(--apple-gray); /* 使用你定义好的灰色 */
+    font-weight: 400;         /* 去掉加粗 */
+    margin: 10px 0;           /* 增加一点呼吸感 */
+    letter-spacing: 0.1px;    /* 稍微松一点的字间距 */
+}

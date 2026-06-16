@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>智策系统-餐厅搜索页</title>
+    <style>
+        :root {
+            --apple-blue: #007AFF;
+            --apple-bg: #fbfbfd;
+            --apple-gray: #86868b;
+            --apple-dark: #1d1d1f;
+        }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: var(--apple-bg); font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+
+        /* 🌌 顶栏公用样式 */
+        .nav-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 48px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; z-index: 1000;
+        }
+        .nav-logo { font-size: 18px; font-weight: 600; color: var(--apple-dark); letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-link { font-size: 14px; color: var(--apple-gray); text-decoration: none; transition: all 0.3s; position: relative; padding: 4px 0; }
+        .nav-link:hover { color: var(--apple-dark); }
+        .nav-link.active { color: var(--apple-blue); }
+
+        /* 🧭 侧边栏公用样式 */
+        .sticky-sidebar {
+            position: fixed; top: 48px; left: 0; width: 260px; height: calc(100vh - 48px);
+            background: rgba(255,255,255,0.85); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-right: 1px solid rgba(0,0,0,0.08); z-index: 999; overflow-y: auto; padding: 32px 0; box-sizing: border-box;
+        }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+        .sidebar-link { text-decoration: none; color: inherit; display: block; }
+        .sidebar-item { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 500; color: var(--apple-gray); cursor: pointer; transition: all 0.3s; }
+        .sidebar-item:hover { background: rgba(0,122,255,0.1); color: var(--apple-blue); transform: translateX(4px); }
+        .sidebar-item.active { background: var(--apple-blue); color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.25); }
+        .sidebar-img { width: 20px; height: 20px; object-fit: contain; }
+        .sidebar-text { flex: 1; }
+
+        /* 🌌 极光流动背景层 */
+        .floating-bubbles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            filter: blur(120px);
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.6;
+            mix-blend-mode: multiply;
+            will-change: transform;
+        }
+
+        .bubble:nth-child(1) {
+            width: 80vw; height: 80vw; top: -20%; left: -20%;
+            background: radial-gradient(circle, rgb(176, 197, 243) 0%, transparent 75%);
+            animation: cornerFlowTL 25s infinite alternate ease-in-out;
+        }
+        .bubble:nth-child(2) {
+            width: 75vw; height: 75vw; top: -20%; right: -20%;
+            background: radial-gradient(circle, rgb(145, 246, 227) 0%, transparent 75%);
+            animation: cornerFlowTR 22s infinite alternate ease-in-out;
+        }
+        .bubble:nth-child(3) {
+            width: 85vw; height: 85vw; bottom: -25%; left: -20%;
+            background: radial-gradient(circle, rgb(247, 176, 255) 0%, transparent 75%);
+            animation: cornerFlowBL 28s infinite alternate ease-in-out;
+        }
+        .bubble:nth-child(4) {
+            width: 80vw; height: 80vw; bottom: -20%; right: -20%;
+            background: radial-gradient(circle, rgba(169, 255, 98, 0.96) 0%, transparent 75%);
+            animation: cornerFlowBR 30s infinite alternate ease-in-out;
+        }
+
+        @keyframes cornerFlowTL { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(35vw, 30vh) scale(1.2); } }
+        @keyframes cornerFlowTR { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-30vw, 35vh) scale(1.1); } }
+        @keyframes cornerFlowBL { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40vw, -25vh) scale(1.3); } }
+        @keyframes cornerFlowBR { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-35vw, -35vh) scale(1.2); } }
+
+        /* ✨ 主内容层：包含滑入动画 */
+        .main-content {
+            position: relative;
+            z-index: 100;
+            height: calc(100vh - 48px);
+            margin-top: 48px;
+            margin-left: 260px;
+            width: calc(100vw - 260px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 12vh;
+            align-items: center;
+            box-sizing: border-box;
+
+            /* 🚀 刚打开页面时的缓动滑入效果 */
+            animation: slideUpFade 5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(100px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ✍️ 主标题：高级名家宋体 */
+        .hero-title {
+            font-family: "PingFang Serif", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "衬线宋体", serif;
+            font-size: 56px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ✍️ 副标题：改回宋体、纯正Apple灰、字号加大 */
+        .hero-subtitle {
+            font-family: "PingFang Serif", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "衬线宋体", serif;
+            font-size: 24px;
+            color: var(--apple-gray);
+            margin-bottom: 44px;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        /* 🔍 搜索框外层容器（Index风格：无缝融入与精致悬浮） */
+        .search-container {
+            position: relative;
+            width: 550px;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 融合Index主页的无边框霜华毛玻璃质感 */
+        .search-box {
+            width: 100%;
+            padding: 18px 28px;
+            font-size: 18px;
+            border-radius: 30px;
+            border: none; /* 彻底移除多余边框 */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+
+            /* 注入更具层次感的Index级细腻双层阴影 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 10px 30px rgba(0, 0, 0, 0.06);
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 🖱️ 鼠标悬停动效：Index高级上浮感与柔和阴影漫射 */
+        .search-container:hover {
+            transform: translateY(-5px);
+        }
+        .search-container:hover .search-box {
+            background: rgba(255, 255, 255, 0.85);
+            /* 悬浮时阴影扩散加深，形成完美的空间分层 */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 1. 找到现有的 .search-box:focus 并替换为以下内容 */
+        .search-box:focus {
+            background: #ffffff !important;
+            /* 重点：加入明显的蓝色光源（利用双层 box-shadow 实现外发光） */
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15), 0 12px 35px rgba(0, 122, 255, 0.2) !important;
+        }
+        .search-container:focus-within {
+            transform: scale(1.03) translateY(-4px);
+        }
+
+        .search-btn { position: absolute; right: 8px; top: 7px; width: 46px; height: 46px; border-radius: 50%; background: var(--apple-blue); color: white; border: none; cursor: pointer; font-weight: bold; transition: transform 0.2s, background-color 0.2s; }
+        .search-btn:hover { transform: scale(1.05); background-color: #0062cc; }
+        .search-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <div class="nav-logo">智策·ZHICE</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/attraction_center" class="nav-link">探索</a>
+            <a href="/ai_guide" class="nav-link">智策</a>
+            <a href="/logout" class="nav-link">退出</a>
+        </div>
+    </nav>
+
+    <div class="sticky-sidebar">
+        <div class="sidebar-menu">
+            <a href="/" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/home.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">首页</span>
+                </div>
+            </a>
+            <a href="/city_detail" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/city.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">城市详情</span>
+                </div>
+            </a>
+            <a href="/ai_guide" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/ai_guide.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">智策</span>
+                </div>
+            </a>
+            <a href="/attraction_center" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/scenic.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">景点介绍</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/hotel.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">酒店详情</span>
+                </div>
+            </a>
+            <a href="/food/search" class="sidebar-link">
+                <div class="sidebar-item active">
+                    <span class="sidebar-icon"><img src="/static/images/food.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">餐饮详情</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/route.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">AI路径规划</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/weather.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">旅行天气</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/profile.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">个人中心</span>
+                </div>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon"><img src="/static/images/settings.png" class="sidebar-img"></span>
+                    <span class="sidebar-text">设置</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="floating-bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="hero-title">探寻城市味道</h1>
+        <p class="hero-subtitle">输入你想探索的城市，开启大数据美食筛选</p>
+        <div class="search-container">
+            <input type="text" id="cityInput" class="search-box" placeholder="例如：上海、广州市荔湾区..." autofocus>
+            <button onclick="handleGo()" class="search-btn">➡</button>
+        </div>
+    </div>
+
+    <script>
+        function handleGo() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (city) {
+                window.location.href = `/food/standby?city=${encodeURIComponent(city)}`;
+            }
+        }
+        document.getElementById('cityInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleGo();
+        });
+    </script>
+</body>
+</html>

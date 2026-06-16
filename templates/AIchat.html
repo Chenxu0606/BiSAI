@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI攻略 | 智策旅行</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AIchat.css') }}">
+</head>
+<body>
+{% raw %}
+<div id="app">
+    <div class="floating-bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-logo">智策·ZHICE</div>
+        <div class="bubble center-light"></div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/attraction_center" class="nav-link">探索</a>
+            <a href="#" class="nav-link active">智策</a>
+            <a href="/logout" class="nav-link">退出</a>
+        </div>
+    </nav>
+
+    <div class="sticky-sidebar">
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='/'">
+                <span class="sidebar-icon"><img src="/static/images/home.png" class="sidebar-img"></span>
+                <span class="sidebar-text">首页</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/city_detail'">
+                <span class="sidebar-icon"><img src="/static/images/city.png" class="sidebar-img"></span>
+                <span class="sidebar-text">城市详情</span>
+            </div>
+            <div class="sidebar-item active" onclick="window.location.href='/ai_guide'">
+                <span class="sidebar-icon"><img src="/static/images/ai_guide.png" class="sidebar-img"></span>
+                <span class="sidebar-text">智策</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/attraction_center'">
+                <span class="sidebar-icon"><img src="/static/images/scenic.png" class="sidebar-img"></span>
+                <span class="sidebar-text">景点介绍</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/hotel/detail'">
+                <span class="sidebar-icon"><img src="/static/images/hotel.png" class="sidebar-img"></span>
+                <span class="sidebar-text">酒店详情</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/food/search'">
+                <span class="sidebar-icon"><img src="/static/images/food.png" class="sidebar-img"></span>
+                <span class="sidebar-text">餐饮详情</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/route/plan'">
+                <span class="sidebar-icon"><img src="/static/images/route.png" class="sidebar-img"></span>
+                <span class="sidebar-text">AI路径规划</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/weather'">
+                <span class="sidebar-icon"><img src="/static/images/weather.png" class="sidebar-img"></span>
+                <span class="sidebar-text">旅行天气</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/profile'">
+                <span class="sidebar-icon"><img src="/static/images/profile.png" class="sidebar-img"></span>
+                <span class="sidebar-text">个人中心</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='/settings'">
+                <span class="sidebar-icon"><img src="/static/images/settings.png" class="sidebar-img"></span>
+                <span class="sidebar-text">设置</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <section class="content-section" style="padding-top: 60px;">
+            <div class="section-header text-center mb-12">
+                <h2 class="section-title mx-auto">智策·旅游攻略定制</h2>
+                <p class="section-subtitle">填写旅行信息，让智小策为您生成专属行程并在线答疑~</p>
+            </div>
+
+            <div class="ai-form-card">
+                <form id="travelForm" @submit.prevent="generateGuide">
+                    <div class="form-row">
+                        <div class="form-item">
+                            <label>出发城市 <span class="req">*</span></label>
+                            <input v-model="form.departure" type="text" placeholder="请输入出发城市">
+                        </div>
+                        <div class="form-item">
+                            <label>目的地 <span class="req">*</span></label>
+                            <input v-model="form.destination" type="text" placeholder="请输入目的地">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-item">
+                            <label>出发日期 <span class="req">*</span></label>
+                            <div class="date-wrapper">
+                                <span class="date-display">{{ form.startDate || '请选择出发日期' }}</span>
+                                <input v-model="form.startDate" type="date" class="real-date-input">
+                            </div>
+                        </div>
+                        <div class="form-item">
+                            <label>返程日期 <span class="req">*</span></label>
+                            <div class="date-wrapper">
+                                <span class="date-display">{{ form.endDate || '请选择返程日期' }}</span>
+                                <input v-model="form.endDate" type="date" class="real-date-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-item">
+                            <label>出行人数 <span class="req">*</span></label>
+                            <input v-model.number="form.people" type="number" min="1" placeholder="人数">
+                        </div>
+                        <div class="form-item">
+                            <label>人均预算(元) <span class="req">*</span></label>
+                            <input v-model.number="form.budget" type="number" min="0" placeholder="预算">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-item">
+                            <label>出行方式 <span class="req">*</span></label>
+                            <select v-model="form.travelType">
+                                <option value="">请选择</option>
+                                <option value="自由行">自由行</option>
+                                <option value="自驾">自驾</option>
+                                <option value="公共交通">公共交通</option>
+                                <option value="跟团">跟团</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label>游玩偏好 <span class="req">*</span></label>
+                            <select v-model="form.preference">
+                                <option value="">请选择</option>
+                                <option value="自然风光">自然风光</option>
+                                <option value="人文历史">人文历史</option>
+                                <option value="美食探店">美食探店</option>
+                                <option value="亲子休闲">亲子休闲</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div class="form-item">
+                            <label>特殊需求（选填）</label>
+                            <textarea v-model="form.remark" rows="3" placeholder="老人小孩、饮食禁忌、住宿要求等"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="submit-row">
+                        <button
+                            type="submit"
+                            class="ai-submit-btn"
+                            :disabled="loading">
+                            <span v-if="!loading">立即生成您的专属智策</span>
+                            <span v-else>智小策奋笔疾书中···</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="ai-result-card" v-if="showResult">
+                <div class="result-header">
+                    <h3>您的智策如下：</h3>
+                    <h3 class="ai-disclaimer">本内容由AI生成，请注意辨别。</h3>
+                    <button @click="resetPage" class="reset-btn">重新填写</button>
+                </div>
+                <div class="result-content" v-html="guideContent"></div>
+            </div>
+
+            <div class="ai-chat-card" v-if="showResult">
+                <h3 class="chat-title">智小策在线答疑</h3>
+                <div class="chat-box" ref="chatBox">
+                    <div class="chat-item ai">
+                        <img src="/static/images/ai_avatar.png" class="chat-avatar" alt="智小策">
+                        <div class="chat-bubble">
+                            您好！我是智小策，有什么问题都可以问我喔！~
+                        </div>
+                    </div>
+
+
+                    <div class="chat-item" v-for="(item,idx) in chatList" :key="idx" :class="{user:item.type==='user',ai:item.type==='ai'}">
+                        <div class="avatar" v-if="item.type==='ai'">
+                            <img src="/static/images/ai_avatar.png" alt="智小策" class="avatar-img">
+                        </div>
+                        <div class="avatar" v-else>
+                            <img src="/static/images/user_avatar.png" alt="用户" class="avatar-img">
+                        </div>
+                        <div class="chat-bubble" v-html="item.type==='ai' ? item.parsedContent : item.content"></div>
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input v-model="chatText" @keyup.enter="sendChat" placeholder="输入问题，向智小策提问...">
+                    <button
+                        type="button"
+                        @click="sendChat"
+                        class="send-btn">
+                        发送
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>© 2026 智策旅行大数据系统 · 智策攻略页</p>
+        </footer>
+    </div>
+</div>
+{% endraw %}
+
+<script src="{{ url_for('static', filename='js/AIchat.js') }}"></script>
+</body>
+</html>

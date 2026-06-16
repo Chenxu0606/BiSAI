@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市数据中心 | City Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/City_detail.css') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="floating-bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+        <nav class="nav-bar">
+            <div class="nav-logo">智策·ZHICE</div>
+
+            <div class="nav-links">
+                <a href="/" class="nav-link active">首页</a>
+                <a href="/attraction_center" class="nav-link">探索</a>
+                <a href="/ai_guide" class="nav-link">智策</a>
+                <a href="#" class="nav-link">退出</a>
+            </div>
+        </nav>
+
+    <div class="sticky-sidebar">
+        <div class="sidebar-menu">
+            <a href="/" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/home.png" class="sidebar-img" alt="首页">
+                    </span>
+                    <span class="sidebar-text">首页</span>
+                </div>
+            </a>
+
+            <a href="/city_detail" class="sidebar-link">
+                <div class="sidebar-item active">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/city.png" class="sidebar-img" alt="城市详情">
+                    </span>
+                    <span class="sidebar-text">城市详情</span>
+                </div>
+            </a>
+
+            <a href="/ai_guide" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/ai_guide.png" class="sidebar-img" alt="智策">
+                    </span>
+                    <span class="sidebar-text">智策</span>
+                </div>
+            </a>
+
+            <a href=/attraction_center class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/scenic.png" class="sidebar-img" alt="景点">
+                    </span>
+                    <span class="sidebar-text">景点介绍</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/hotel.png" class="sidebar-img" alt="酒店">
+                    </span>
+                    <span class="sidebar-text">酒店详情</span>
+                </div>
+            </a>
+
+            <a href="/food/search" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/food.png" class="sidebar-img" alt="餐饮">
+                    </span>
+                    <span class="sidebar-text">餐饮详情</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/route.png" class="sidebar-img" alt="路径">
+                    </span>
+                    <span class="sidebar-text">AI路径规划</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/weather.png" class="sidebar-img" alt="天气">
+                    </span>
+                    <span class="sidebar-text">旅行天气</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/profile.png" class="sidebar-img" alt="个人中心">
+                    </span>
+                    <span class="sidebar-text">个人中心</span>
+                </div>
+            </a>
+
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">
+                        <img src="/static/images/settings.png" class="sidebar-img" alt="设置">
+                    </span>
+                    <span class="sidebar-text">设置</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <main class="dashboard-container">
+        <div id="bg-layer"></div>
+
+        <header class="glass-header">
+
+            <div class="search-bar">
+                <input type="text" id="city-search" placeholder="输入城市名称，如：上海" autocomplete="off">
+                <button id="search-btn">➔</button>
+            </div>
+        </header>
+
+        <section class="data-grid">
+
+            <article class="glass-card hero-card">
+                <h1 id="city-name" class="hero-title">加载中...</h1>
+                <p id="city-slogan" class="subtitle">获取数据中</p>
+                <div class="tags-container" id="city-tags">
+                    </div>
+            </article>
+
+            <article class="glass-card weather-card">
+                <h2 class="card-title">实时环境</h2>
+                <div class="weather-info">
+                    <div class="temp"><span id="weather-temp">--</span>°C</div>
+                    <div class="status" id="weather-status">--</div>
+                </div>
+            </article>
+
+            <article class="glass-card stats-card">
+                <h2 class="card-title">核心指标</h2>
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <span class="label">常住人口</span>
+                        <span class="value" id="stat-pop">--万</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">地区生产总值</span>
+                        <span class="value" id="stat-gdp">--万亿</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">行政面积</span>
+                        <span class="value" id="stat-area">-- km²</span>
+                    </div>
+                </div>
+            </article>
+
+                        <!-- 城市印象 -->
+            <article class="glass-card impression-card">
+                <h2 class="card-title">城市印象</h2>
+
+                <div class="impression-list">
+
+                    <div class="impression-item">
+                        <span class="impression-label">国际化</span>
+                        <div class="impression-bar">
+                            <div class="bar-fill" style="width:95%"></div>
+                        </div>
+                        <span class="score">9.5</span>
+                    </div>
+
+                    <div class="impression-item">
+                        <span class="impression-label">消费水平</span>
+                        <div class="impression-bar">
+                            <div class="bar-fill" style="width:90%"></div>
+                        </div>
+                        <span class="score">9.0</span>
+                    </div>
+
+                    <div class="impression-item">
+                        <span class="impression-label">历史文化</span>
+                        <div class="impression-bar">
+                            <div class="bar-fill" style="width:82%"></div>
+                        </div>
+                        <span class="score">8.2</span>
+                    </div>
+
+                    <div class="impression-item">
+                        <span class="impression-label">夜生活</span>
+                        <div class="impression-bar">
+                            <div class="bar-fill" style="width:96%"></div>
+                        </div>
+                        <span class="score">9.6</span>
+                    </div>
+
+                    <div class="impression-item">
+                        <span class="impression-label">自然景观</span>
+                        <div class="impression-bar">
+                            <div class="bar-fill" style="width:65%"></div>
+                        </div>
+                        <span class="score">6.5</span>
+                    </div>
+
+                </div>
+            </article>
+
+            <!-- 最佳旅行时间 -->
+            <article class="glass-card season-card">
+
+                <h2 class="card-title">最佳旅行时间</h2>
+
+                <div class="season-block best">
+                    <span class="season-tag">推荐</span>
+                    <h3>3月 - 5月</h3>
+                    <p>春季气候舒适，城市景观最佳。</p>
+                </div>
+
+                <div class="season-block best">
+                    <span class="season-tag">推荐</span>
+                    <h3>9月 - 11月</h3>
+                    <p>秋高气爽，适合城市漫步与摄影。</p>
+                </div>
+
+                <div class="season-block warning">
+                    <span class="season-tag warning-tag">避开</span>
+                    <h3>7月 - 8月</h3>
+                    <p>高温潮湿，旅游体验下降。</p>
+                </div>
+
+            </article>
+
+        </section>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/City_detail.js') }}"></script>
+
+</body>
+</html>

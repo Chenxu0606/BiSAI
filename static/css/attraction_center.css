@@ -1,0 +1,387 @@
+
+/* =====================================
+   Travel Discovery Center
+   Apple Glass UI v2
+===================================== */
+:root{
+    --apple-blue:#007AFF;
+    --apple-bg:#fbfbfd;
+    --apple-dark:#1d1d1f;
+    --apple-gray:#86868b;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--apple-bg);
+    overflow-x:hidden;
+}
+
+/* Floating background */
+.floating-bubbles{position:fixed;inset:0;z-index:0;filter:blur(120px);pointer-events:none;overflow:hidden}
+.bubble{position:absolute;border-radius:50%;opacity:.55}
+.bubble:nth-child(1){width:80vw;height:80vw;top:-20%;left:-20%;background:radial-gradient(circle,rgb(176,197,243) 0%,transparent 75%)}
+.bubble:nth-child(2){width:75vw;height:75vw;top:-20%;right:-20%;background:radial-gradient(circle,rgb(145,246,227) 0%,transparent 75%)}
+.bubble:nth-child(3){width:85vw;height:85vw;bottom:-25%;left:-20%;background:radial-gradient(circle,rgb(247,176,255) 0%,transparent 75%)}
+.bubble:nth-child(4){width:80vw;height:80vw;bottom:-20%;right:-20%;background:radial-gradient(circle,rgba(169,255,98,.9) 0%,transparent 75%)}
+
+/* Nav */
+.nav-bar{
+    position:fixed;top:0;left:0;right:0;height:48px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;z-index:1000;
+    background:rgba(255,255,255,.82);
+    backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:1px solid rgba(0,0,0,.08);
+}
+.nav-logo{font-size:18px;font-weight:600}
+.nav-links{display:flex;gap:32px}
+.nav-link{text-decoration:none;color:var(--apple-gray)}
+.nav-link.active{color:var(--apple-blue)}
+
+/* Sidebar */
+.sticky-sidebar{
+    position:fixed;top:48px;left:0;width:260px;height:calc(100vh - 48px);
+    padding:32px 16px;overflow-y:auto;z-index:999;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(20px) saturate(180%);
+    border-right:1px solid rgba(0,0,0,.08);
+}
+.sidebar-menu{display:flex;flex-direction:column;gap:8px}
+.sidebar-link{text-decoration:none}
+.sidebar-item{
+    display:flex;align-items:center;gap:16px;padding:14px 20px;border-radius:12px;
+    color:var(--apple-gray);transition:.25s;
+}
+.sidebar-item.active{background:var(--apple-blue);color:#fff}
+.sidebar-img{width:20px;height:20px}
+.sidebar-item.active .sidebar-img{filter:brightness(0) invert(1)}
+
+.sidebar-item:hover{
+    background: rgba(0,122,255,0.1);
+    color: var(--apple-blue);
+    transform: translateX(6px);
+}
+
+.sidebar-item:hover .sidebar-img{
+    transform: scale(1.12);
+}
+
+.sidebar-img{
+    width:20px;
+    height:20px;
+    transition:all .25s ease;
+}
+
+/* Main */
+.dashboard-container{
+    margin-left:260px;
+    position:relative;
+    z-index:2;
+}
+
+/* Hero */
+.hero-section{
+    position:relative;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+}
+.hero {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.05);
+    z-index: 1;
+    opacity: 1;
+    background-color: #000;
+    transition: opacity 1s ease;
+}
+
+
+.hero-mask{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 2;
+}
+.hero-content{
+    position: absolute;
+    top: 50%;
+    left: 12%;
+    transform: translateY(-50%);
+    z-index: 3;
+}
+.hero-kicker{
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.hero-title{
+    font-family:'Noto Serif SC',serif;
+    font-size:92px;
+    line-height:1.05;
+    margin-bottom:24px;
+    color: #ffffff;
+    font-weight: 900;
+    text-shadow: 0 8px 30px rgba(0,0,0,0.55);
+}
+
+.hero-description{
+    color: rgba(255,255,255,0.75);
+    font-size: 18px;
+    line-height: 1.8;
+    max-width: 560px;
+    margin-bottom: 28px;
+}
+.hero-stat-group{
+    display:flex;
+    gap:24px;
+    margin-bottom:40px;
+}
+.hero-stat{
+    min-width:180px;
+    padding:24px;
+    border-radius:22px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(18px);
+}
+.hero-stat h3{
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.hero-stat span{
+    color: rgba(255,255,255,0.75);
+    font-size: 13px;
+}
+
+.explore-btn{
+    position: relative;
+    display: inline-block;
+    padding: 30px 258px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    backdrop-filter: blur(14px);
+    cursor: pointer;
+    transition: all 0.35s ease;
+    overflow: hidden;
+}
+
+.explore-btn:hover{
+    transform: translateY(-3px) scale(1.03);
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
+.explore-btn:active{
+    transform: translateY(0px) scale(0.98);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.explore-btn:hover{
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+}
+
+/* Cards */
+.glass-card{
+    background:rgba(255,255,255,.62);
+    backdrop-filter:blur(30px);
+    border:1px solid rgba(255,255,255,.45);
+    border-radius:28px;
+    box-shadow:0 10px 40px rgba(0,0,0,.08);
+}
+.section-card{
+    width:min(1200px,92%);
+    margin:40px auto;
+    padding:32px;
+}
+.section-header{
+    margin-bottom:24px;
+}
+.section-header h2{
+    font-size:34px;
+    margin-bottom:8px;
+}
+.section-header p{color:#666}
+
+/* AI */
+.recommend-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:20px;
+}
+
+.recommend-card{
+    border-radius: 22px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(25px);
+    transition: all 0.3s ease;
+}
+
+.recommend-body{
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.recommend-cover{
+    height: 180px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-color: #eee; /* ⭐防止没图变黑 */
+}
+
+.recommend-cover{
+    height: 180px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+
+
+/* Attractions */
+.horizontal-scroll{
+    display:flex;
+    gap:20px;
+    overflow-x:auto;
+    padding-bottom:10px;
+}
+
+.horizontal-scroll::-webkit-scrollbar{height:8px}
+
+.attraction-card{
+    min-width:320px;
+    border-radius:24px;
+    overflow:hidden;
+    flex-shrink:0;
+
+    background:rgba(255,255,255,.65);
+    backdrop-filter:blur(25px);
+
+    transition:.3s;
+}
+
+.attraction-card:hover{
+    transform:translateY(-8px);
+}
+
+.attraction-cover{
+    width:100%;
+    height:240px;
+
+    background-size:cover;
+    background-position:center;
+}
+
+.attraction-info{
+    padding:18px;
+}
+
+.attraction-info h3{
+    font-size:22px;
+    margin-bottom:6px;
+}
+
+.attraction-info p{
+    color:#666;
+    font-size:14px;
+}
+
+/* Themes */
+.theme-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+.theme-card{
+    padding:34px;
+    border-radius:22px;
+    background:rgba(255,255,255,.55);
+    text-align:center;
+    transition:.3s;
+}
+.theme-card:hover{
+    transform:translateY(-6px);
+}
+.theme-icon{
+    display:block;
+    font-size:42px;
+    margin-bottom:12px;
+}
+
+/* Seasons */
+.season-layout{
+    width:min(1200px,92%);
+    margin:40px auto;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:24px;
+}
+.season-card{
+    min-height:240px;
+    padding:32px;
+}
+.season-card span{
+    letter-spacing:3px;
+    opacity:.7;
+}
+.season-card h3{
+    font-size:64px;
+    margin:12px 0;
+}
+
+/* Cities */
+.city-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+.city-card{
+    padding:30px;
+    text-align:center;
+    border-radius:20px;
+    background:white;
+    cursor:pointer;
+    transition:.25s;
+}
+.city-card:hover{
+    transform:translateY(-4px);
+}
+
+/* Responsive */
+@media(max-width:992px){
+    .sticky-sidebar{display:none}
+    .dashboard-container{margin-left:0}
+    .hero-title{font-size:62px}
+    .theme-grid,.city-grid,.season-layout{
+        grid-template-columns:1fr;
+    }
+    .hero-stat-group{
+        flex-direction:column;
+        max-width:320px;
+    }
+}
